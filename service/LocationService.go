@@ -1,7 +1,6 @@
 package service
 
 import (
-	"booking/model"
 	"booking/model/response"
 	"booking/repository"
 	"context"
@@ -24,12 +23,10 @@ func NewLocationService(repository repository.LocationRepository) LocationServic
 func (service *LocationServiceImpl) GetLocations(ctx context.Context) []response.LocationResponse {
 	var output []response.LocationResponse
 
-	var locations *[]model.Location = new([]model.Location)
+	locations := service.repository.GetLocations()
 
-	service.repository.GetLocations(locations)
-
-	if locations != nil {
-		for _, each := range *locations {
+	if len(locations) > 0 {
+		for _, each := range locations {
 			output = append(output, response.ToLocationResponse(each))
 		}
 	}

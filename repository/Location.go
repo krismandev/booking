@@ -8,7 +8,7 @@ import (
 )
 
 type LocationRepository interface {
-	GetLocations(*[]model.Location)
+	GetLocations() []model.Location
 }
 
 type LocationRepositoryImpl struct {
@@ -21,10 +21,12 @@ func NewLocationRepository(db *connection.DBConnection) LocationRepository {
 	}
 }
 
-func (repository *LocationRepositoryImpl) GetLocations(locations *[]model.Location) {
-
+func (repository *LocationRepositoryImpl) GetLocations() []model.Location {
+	locations := []model.Location{}
 	err := repository.dbConn.DB.Model(&locations).Find(&locations).Error
 	if err != nil {
 		logrus.Errorf("Error in repository : %v", err)
 	}
+
+	return locations
 }
