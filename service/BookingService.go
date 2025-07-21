@@ -101,10 +101,16 @@ func (service *BookingServiceImpl) CreateBooking(ctx context.Context, request re
 		return resp, &utils.UnprocessableContentError{Message: "Invalid Room"}
 	}
 
+	alreadyBooked := service.repository.CheckRoomAlreadyBooked(request.RoomID, request.StartDate)
+	if alreadyBooked {
+		logrus.Errorf("Error in service. Room Already booked : %v", err)
+		return resp, &utils.UnprocessableContentError{Message: "Room already booked at given time"}
+	}
+
 	var data model.Booking
 	data.Category = request.Category
 	data.UserID = request.UserID
-	data.Description = request.Description
+	data.Description = &request.Description
 	data.StartDate = request.StartDate
 	data.EndDate = request.EndDate
 	data.RoomID = request.RoomID

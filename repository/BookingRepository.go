@@ -11,6 +11,7 @@ import (
 type BookingRepository interface {
 	GetBookings(model.BookingListQueryFilter) []model.Booking
 	CreateBooking(*model.Booking) error
+	CheckRoomAlreadyBooked(roomId string, startDateRequested string) bool
 }
 
 type BookingRepositoryImpl struct {
@@ -46,7 +47,7 @@ func (repository *BookingRepositoryImpl) GetBookings(filter model.BookingListQue
 	}
 
 	if len(filter.RoomID) > 0 {
-		qry = qry.Where("roomid IN ?", filter.RoomID)
+		qry = qry.Where("roomid = ?", filter.RoomID)
 	}
 
 	err := qry.Find(&bookings).Error
@@ -66,4 +67,12 @@ func (repository *BookingRepositoryImpl) CreateBooking(dt *model.Booking) error 
 	}
 
 	return err
+}
+
+func (repository *BookingRepositoryImpl) CheckRoomAlreadyBooked(roomId string, startDateRequested string) bool {
+	var available bool
+
+	qry := "SELECT EXISTS (SELECT 1 from bookings WHERE ? >= startDate AND ? < endDate) "
+	repository.dbConn.Raw(qry, startDateRequested, startDateRequested).Scan(&available)
+	return available
 }

@@ -87,12 +87,16 @@ func InitApp(app *Application) {
 	userService := service.NewUserService(userRepository, app.DB)
 	userController := controller.NewUserController(userService)
 
+	authService := service.NewAuthService(userRepository, app.DB)
+	authController := controller.NewAuthController(authService)
+
 	routeConfig := route.RouteConfig{
 		Echo:               app.Echo,
 		LocationController: locationController,
 		RoomController:     roomController,
 		BookingController:  bookingController,
 		UserController:     userController,
+		AuthController:     authController,
 	}
 
 	routeConfig.InitRoute()

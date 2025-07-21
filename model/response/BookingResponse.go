@@ -27,7 +27,7 @@ func ToBookingResponse(dt model.Booking, dtRoom *model.Room, dtLocation *model.L
 	resp.ID = dt.ID
 	resp.RoomID = dt.RoomID
 	resp.Category = dt.Category
-	resp.Description = dt.Description
+	resp.Description = *dt.Description
 	resp.StartDate = dt.StartDate
 	resp.EndDate = dt.EndDate
 	resp.Title = dt.Title

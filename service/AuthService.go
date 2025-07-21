@@ -11,7 +11,6 @@ import (
 	"booking/repository"
 	"booking/utils"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -24,14 +23,14 @@ type AuthService interface {
 type AuthServiceImpl struct {
 	repository repository.UserRepository
 	dbConn     *connection.DBConnection
-	validate   *validator.Validate
+	// validate   *validator.Validate
 }
 
-func NewAuthService(repository repository.UserRepository, dbConn *connection.DBConnection, validate *validator.Validate) AuthService {
+func NewAuthService(repository repository.UserRepository, dbConn *connection.DBConnection) AuthService {
 	return &AuthServiceImpl{
 		repository: repository,
 		dbConn:     dbConn,
-		validate:   validate,
+		// validate:   validate,
 	}
 }
 
