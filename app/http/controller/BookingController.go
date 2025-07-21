@@ -1,0 +1,92 @@
+package controller
+
+import (
+	"booking/app/http/middleware"
+	"booking/model/request"
+	"booking/model/response"
+	"booking/service"
+	"booking/utils"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
+)
+
+type BookingController interface {
+	GetBookings(c echo.Context) error
+	CreateBooking(c echo.Context) error
+}
+
+type BookingControllerImpl struct {
+	BookingService service.BookingService
+}
+
+func NewBookingController(locationService service.BookingService) BookingController {
+	return &BookingControllerImpl{
+		BookingService: locationService,
+	}
+}
+
+func (controller *BookingControllerImpl) GetBookings(c echo.Context) error {
+	var err error
+	ctx := c.Request().Context()
+	var responseData response.GlobalListDataResponse
+
+	var req request.BookingListRequest
+	req.Limit = c.QueryParams().Get("limit")
+	req.Page = c.QueryParams().Get("page")
+	req.Filter = c.QueryParams().Get("filter")
+
+	resp, err := controller.BookingService.GetBookings(ctx, req)
+	if err != nil {
+		response.WriteResponseSingleJSON(c, responseData, err)
+	}
+
+	for _, each := range resp.Data {
+		responseData.List = append(responseData.List, each)
+	}
+	responseData.MetadataResponse = resp.MetadataResponse
+
+	response.WriteResponseListJSON(c, responseData, nil)
+	return err
+}
+
+func (controller *BookingControllerImpl) CreateBooking(c echo.Context) error {
+	var err error
+
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*middleware.JWTCustomClaims)
+
+	var request request.CreateBookingRequest
+	var resp response.GlobalSingleResponse
+	err = utils.ParseRequestBody(c, &request)
+	if err != nil {
+		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{})
+		logrus.Errorf("Error in controller. Parsing error : %v", err)
+		return err
+	}
+
+	request.UserID = claims.UserID
+
+	if err = c.Validate(&request); err != nil {
+		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
+			Code:    400,
+			Message: utils.FormatValidationErrors(err),
+		})
+		logrus.Errorf("Error in controller. Validation error : %v", err)
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	createBookingResponse, err := controller.BookingService.CreateBooking(ctx, request)
+	if err != nil {
+		response.WriteResponseSingleJSON(c, nil, err)
+		logrus.Errorf("Failed to create booking : %v", err)
+		return err
+	}
+	resp.Data = createBookingResponse
+	response.WriteResponseSingleJSON(c, resp.Data, err)
+
+	return err
+}

@@ -37,6 +37,9 @@ func NewConnection(dbConfig map[string]string) (*DBConnection, error) {
 	// if err != nil {
 	// 	return nil, err
 	// }
+	if dbConfig["env"] != "prod" {
+		db = db.Debug()
+	}
 	logrus.Info("Database connection initiated")
 
 	return &DBConnection{

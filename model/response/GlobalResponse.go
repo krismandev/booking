@@ -16,11 +16,8 @@ type GlobalJSONResponse struct {
 }
 
 type GlobalListDataResponse struct {
-	PerPage   int   `json:"perPage"`
-	Page      int   `json:"page"`
-	TotalPage int   `json:"totalPage"`
-	TotalData int   `json:"totalData"`
-	List      []any `json:"list"`
+	MetadataResponse
+	List []any `json:"list"`
 }
 
 type GlobalListResponse struct {

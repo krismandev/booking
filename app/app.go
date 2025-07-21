@@ -79,10 +79,20 @@ func InitApp(app *Application) {
 	roomService := service.NewRoomService(roomRepository, locationRepository)
 	roomController := controller.NewRoomController(roomService)
 
+	bookingRepository := repository.NewBookingRepository(app.DB)
+	bookingService := service.NewBookingService(bookingRepository, locationRepository, roomRepository)
+	bookingController := controller.NewBookingController(bookingService)
+
+	userRepository := repository.NewUserRepository(app.DB)
+	userService := service.NewUserService(userRepository, app.DB)
+	userController := controller.NewUserController(userService)
+
 	routeConfig := route.RouteConfig{
 		Echo:               app.Echo,
 		LocationController: locationController,
 		RoomController:     roomController,
+		BookingController:  bookingController,
+		UserController:     userController,
 	}
 
 	routeConfig.InitRoute()

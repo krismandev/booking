@@ -9,6 +9,7 @@ import (
 
 type RoomRepository interface {
 	GetRooms() []model.Room
+	GetRoomByIDs(roomIDs []string) []model.Room
 }
 
 type RoomRepositoryImpl struct {
@@ -29,4 +30,15 @@ func (repository *RoomRepositoryImpl) GetRooms() []model.Room {
 	}
 
 	return Rooms
+}
+
+func (repository *RoomRepositoryImpl) GetRoomByIDs(roomIDs []string) []model.Room {
+	rooms := []model.Room{}
+
+	err := repository.dbConn.DB.Model(&rooms).Where("id IN ?", roomIDs).Find(&rooms).Error
+	if err != nil {
+		logrus.Errorf("Error in repository : %v", err)
+	}
+
+	return rooms
 }
