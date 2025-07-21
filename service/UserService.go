@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"math"
 	"time"
 
 	connection "booking/connection/database"
@@ -13,6 +15,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kenshaw/envcfg"
+	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type UserService interface {
@@ -109,4 +113,160 @@ func (service *userServiceImpl) CreateUser(ctx context.Context, req request.Crea
 	// jsonString := string(encoded)
 	// service.mailProducer.PublishMessage(jsonString)
 	return resp, err
+}
+
+func (service *userServiceImpl) GetUser(ctx context.Context, id string) (response.UserResponse, error) {
+	var resp response.UserResponse
+
+	user, err := service.repository.FindUserById(id)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return resp, &utils.NotFoundError{
+			Code:    400,
+			Message: "User not found",
+		}
+	}
+
+	resp = response.ToUserResponse(user)
+
+	return resp, nil
+}
+
+func (service *userServiceImpl) ListUser(ctx context.Context, request request.UserListRequest) ([]response.UserResponse, int, int, int, int, error) {
+	var data []response.UserResponse
+
+	limit := request.Limit
+	page := request.Page
+	offset := (page - 1) * limit
+
+	users, count := service.repository.GetUserList(limit, offset)
+
+	for _, each := range users {
+		dt := response.ToUserResponse(each)
+		data = append(data, dt)
+	}
+
+	totalPages := int(math.Ceil(float64(count) / float64(limit)))
+
+	return data, page, limit, totalPages, int(count), nil
+}
+
+func (service *userServiceImpl) UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error) {
+	var resp response.UpdateUserResponse
+
+	tx := service.dbConn.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	existingUser, err := service.repository.FindUserById(request.UserId)
+	if err != nil {
+		logrus.Errorf("Error : %v", err)
+		return resp, &utils.InternalServerError{}
+	}
+
+	if len(existingUser.ID) == 0 {
+		logrus.Errorf("Error in service. User not found id=%v", request.UserId)
+		return resp, &utils.NotFoundError{Message: "User not found"}
+	}
+
+	if len(request.Name) > 0 {
+		existingUser.Name = request.Name
+	}
+	if len(request.Email) > 0 {
+		existingUser.Email = request.Email
+	}
+
+	if len(request.Password) > 0 {
+		pwd := utils.HashPassword(request.Password)
+		existingUser.Password = &pwd
+	}
+
+	// err = service.repository.
+	// 	tx.Commit()
+
+	// resp.ID = user.ID
+	// resp.Name = user.Name
+	// resp.Email = user.Email
+	// resp.MerhchantId = user.MerchantID
+	// resp.Status = user.Status
+	// resp.CreatedTime = *user.CreatedTime
+
+	return resp, nil
+}
+
+func (service *userServiceImpl) DeleteUser(ctx context.Context, id string) (response.GlobalJSONResponse, error) {
+	var resp response.GlobalJSONResponse
+
+	tx := service.dbConn.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if err := tx.Error; err != nil {
+		logrus.Errorf("Database Connection Error: %v", err)
+		return resp, &utils.InternalServerError{
+			Code:    500,
+			Message: "Internal Server Error",
+		}
+	}
+
+	var userModel model.User
+	checkUser := tx.Where(&model.User{ID: id}).First(&userModel)
+
+	if errors.Is(checkUser.Error, gorm.ErrRecordNotFound) {
+		tx.Rollback()
+		return resp, &utils.UnprocessableContentError{
+			Code:    422,
+			Message: "User with ID " + id + " not found or already deleted",
+		}
+	}
+
+	if err := tx.Delete(&userModel).Error; err != nil {
+		logrus.Errorf("Database Connection Error: %v", err)
+		tx.Rollback()
+		return resp, &utils.InternalServerError{
+			Code:    500,
+			Message: "Internal Server Error",
+		}
+	}
+
+	tx.Commit()
+
+	resp.Message = "success"
+
+	return resp, nil
+}
+
+// set password for the first time
+func (service *userServiceImpl) SetPassword(ctx context.Context, token string, req request.SetPasswordRequest) error {
+	var err error
+
+	merchant := service.merchantRepository.FindMerchantByVerifyToken(token)
+	if len(merchant.ID) == 0 {
+		logrus.Errorf("Error in Service : Merchant not found")
+		return &utils.BadRequestError{Message: "Merchant not found"}
+	}
+
+	user := service.repository.FindUserByMerchantID(merchant.ID)
+	if len(user.ID) == 0 {
+		logrus.Errorf("Error in Service : Merchant not found")
+		return &utils.BadRequestError{Message: "Merchant not found"}
+	}
+
+	if user.Password != nil {
+		logrus.Errorf("Password has already been set")
+		return &utils.ForbiddenError{Message: "Password has already been set"}
+	}
+
+	password := utils.HashPassword(req.Password)
+	err = service.repository.SetPassword(user.ID, password)
+	if err != nil {
+		logrus.Errorf("Error in Service : Failed to set password %v", err)
+		return err
+	}
+	return err
 }

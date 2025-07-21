@@ -5,3 +5,14 @@ type CreateUserRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Password string `json:"password" validate:"required,min=8,max=20,password"`
 }
+
+type UserListRequest struct {
+	GlobalListDataRequest
+}
+
+type UpdateUserRequest struct {
+	UserId   string `json:"userId" validate:"required"`
+	Email    string `json:"email" validate:"omitempty,email"`
+	Name     string `json:"name"`
+	Password string `json:"password" validate:"omitempty,min=8,max=20,password"`
+}

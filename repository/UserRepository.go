@@ -16,7 +16,7 @@ type UserRepository interface {
 	FindUserByEmail(tx *gorm.DB, email string) []model.User
 	FindOneUserByEmail(email string) (model.User, error)
 	FindUserById(userId string) (model.User, error)
-	GetUserList(limit int, offset int, merchantId string) ([]model.User, int64)
+	GetUserList(limit int, offset int) ([]model.User, int64)
 	SetPassword(userId string, password string) error
 	FindUserByMerchantID(merchantID string) model.User
 }
@@ -107,7 +107,7 @@ func (repo *UserRepositoryImpl) FindUserById(userId string) (model.User, error) 
 	return output, err
 }
 
-func (repo *UserRepositoryImpl) GetUserList(limit int, offset int, merchantId string) ([]model.User, int64) {
+func (repo *UserRepositoryImpl) GetUserList(limit int, offset int) ([]model.User, int64) {
 	var output []model.User
 	var count int64
 

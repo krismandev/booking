@@ -1,5 +1,11 @@
 package model
 
+const (
+	SMALL  = "SMALL"
+	MEDIUM = "MEDIUM"
+	LARGE  = "LARGE"
+)
+
 type Room struct {
 	ID         string `gorm:"column:id"`
 	Name       string `gorm:"column:name"`
