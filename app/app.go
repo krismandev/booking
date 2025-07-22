@@ -99,6 +99,7 @@ func InitApp(app *Application) {
 		BookingController:  bookingController,
 		UserController:     userController,
 		AuthController:     authController,
+		DB:                 *app.DB,
 	}
 
 	routeConfig.InitRoute()

@@ -3,7 +3,6 @@ package repository
 import (
 	connection "booking/connection/database"
 	"booking/model"
-	"fmt"
 
 	"github.com/sirupsen/logrus"
 )
@@ -63,7 +62,7 @@ func (repository *BookingRepositoryImpl) CreateBooking(dt *model.Booking) error 
 
 	err := repository.dbConn.DB.Create(&dt).Error
 	if err != nil {
-		fmt.Println("Error in repository : %v", err)
+		logrus.Errorf("Error in repository : %v", err)
 	}
 
 	return err

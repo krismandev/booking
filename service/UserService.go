@@ -22,7 +22,7 @@ import (
 type UserService interface {
 	CreateUser(ctx context.Context, request request.CreateUserRequest) (response.CreateUserResponse, error)
 	// GetUser(ctx context.Context, id string) (response.CreateUserResponse, error)
-	// ListUser(ctx context.Context, request request.UserListRequest) ([]response.UserResponse, int, int, int, int, error)
+	GetUsers(ctx context.Context, request request.UserListRequest) (response.UserListResponse, error)
 	// UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error)
 	// DeleteUser(ctx context.Context, id string) (response.GlobalJSONResponse, error)
 	// SetPassword(ctx context.Context, token string, req request.SetPasswordRequest) error
@@ -238,6 +238,13 @@ func (service *userServiceImpl) DeleteUser(ctx context.Context, id string) (resp
 	resp.Message = "success"
 
 	return resp, nil
+}
+
+func (service *userServiceImpl) GetUsers(ctx context.Context, request request.UserListRequest) (response.UserListResponse, error) {
+	var resp response.UserListResponse
+	var err error
+
+	return resp, err
 }
 
 // set password for the first time

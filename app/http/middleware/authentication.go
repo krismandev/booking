@@ -43,18 +43,21 @@ func jwtSecret() string {
 
 type JWTCustomClaims struct {
 	UserID string `json:"userId"`
+	RoleID string `json:"roleId"`
 	jwt.RegisteredClaims
 }
 
-func GenerateJWT(userID string) (string, string, int64, error) {
+func GenerateJWT(userID string, roleID string) (string, string, int64, error) {
 	accessTokenClaims := &JWTCustomClaims{
 		userID,
+		roleID,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 30)),
 		},
 	}
 	refreshTokenClaims := &JWTCustomClaims{
 		userID,
+		roleID,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
 		},
@@ -129,6 +132,7 @@ func (m *JwtMiddleware) SetUserContext(next echo.HandlerFunc) echo.HandlerFunc {
 		// Simpan user di context
 		ctx := context.WithValue(c.Request().Context(), ctxKey, map[string]string{
 			"userId": claims.UserID,
+			"roleId": claims.RoleID,
 		})
 		// Update request context di Echo
 		c.SetRequest(c.Request().WithContext(ctx))

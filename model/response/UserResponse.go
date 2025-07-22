@@ -47,3 +47,8 @@ type RoleResponse struct {
 	Name       string   `json:"name"`
 	Privileges []string `roles`
 }
+
+type UserListResponse struct {
+	GlobalListDataResponse
+	Data []UserResponse
+}

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"booking/app/http/middleware"
@@ -20,7 +19,7 @@ import (
 type AuthService interface {
 	Login(ctx context.Context, request request.LoginRequest) (response.LoginResponse, error)
 	AuthUserDetail(ctx context.Context, userID string) (response.AuthUserDetailResponse, error)
-	RefreshToken(ctx context.Context, userID string) (map[string]any, error)
+	// RefreshToken(ctx context.Context, userID string) (map[string]any, error)
 }
 
 type AuthServiceImpl struct {
@@ -51,6 +50,11 @@ func (service *AuthServiceImpl) Login(ctx context.Context, req request.LoginRequ
 		}
 	}
 
+	role := service.roleRepository.GetUserRole(user.ID)
+	if len(role.ID) == 0 {
+		return response, &utils.InternalServerError{Message: "Something went wrong"}
+	}
+
 	checkPassword := utils.ComparePass([]byte(*user.Password), []byte(req.Password))
 	if !checkPassword {
 		return response, &utils.BadRequestError{
@@ -59,7 +63,7 @@ func (service *AuthServiceImpl) Login(ctx context.Context, req request.LoginRequ
 		}
 	}
 
-	accessToken, refreshToken, expiredAtStr, err := middleware.GenerateJWT(user.ID)
+	accessToken, refreshToken, expiredAtStr, err := middleware.GenerateJWT(user.ID, role.RoleID)
 	if err != nil {
 		logrus.Errorf("Error Generating JWT: %v", err)
 		return response, &utils.InternalServerError{
@@ -75,18 +79,18 @@ func (service *AuthServiceImpl) Login(ctx context.Context, req request.LoginRequ
 	return response, err
 }
 
-func (service *AuthServiceImpl) RefreshToken(ctx context.Context, userID string) (map[string]any, error) {
+// func (service *AuthServiceImpl) RefreshToken(ctx context.Context, userID string) (map[string]any, error) {
 
-	newAccessToken, _, expiryTimeStr, err := middleware.GenerateJWT(userID)
-	if err != nil {
-		return map[string]any{"error": "could not generate token"}, err
-	}
+// 	newAccessToken, _, expiryTimeStr, err := middleware.GenerateJWT(userID)
+// 	if err != nil {
+// 		return map[string]any{"error": "could not generate token"}, err
+// 	}
 
-	return map[string]any{
-		"accessToken": newAccessToken,
-		"expiryTime":  expiryTimeStr,
-	}, err
-}
+// 	return map[string]any{
+// 		"accessToken": newAccessToken,
+// 		"expiryTime":  expiryTimeStr,
+// 	}, err
+// }
 
 func (service *AuthServiceImpl) AuthUserDetail(ctx context.Context, userID string) (response.AuthUserDetailResponse, error) {
 	var resp response.AuthUserDetailResponse
@@ -110,11 +114,11 @@ func (service *AuthServiceImpl) AuthUserDetail(ctx context.Context, userID strin
 
 	var privileges []string
 
-	err = json.Unmarshal([]byte(role.Privileges), &privileges)
-	if err != nil {
-		logrus.Errorf("Error when unmarshalling %v", err)
-		return resp, err
-	}
+	// err = json.Unmarshal([]byte(role.Privileges), &privileges)
+	// if err != nil {
+	// 	logrus.Errorf("Error when unmarshalling %v", err)
+	// 	return resp, err
+	// }
 
 	resp.User.ID = user.ID
 	resp.User.Name = user.Name

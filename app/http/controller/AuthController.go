@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"net/http"
-
 	"booking/app/http/middleware"
 	"booking/model/request"
 	"booking/model/response"
@@ -16,7 +14,7 @@ import (
 
 type AuthController interface {
 	Login(c echo.Context) error
-	RefreshToken(c echo.Context) error
+	// RefreshToken(c echo.Context) error
 	AuthUserDetail(c echo.Context) error
 }
 
@@ -69,36 +67,36 @@ func (controller *AuthControllerImpl) Login(c echo.Context) error {
 	return err
 }
 
-func (controller *AuthControllerImpl) RefreshToken(c echo.Context) error {
-	var request RefreshRequest
-	if err := c.Bind(&request); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
-	}
+// func (controller *AuthControllerImpl) RefreshToken(c echo.Context) error {
+// 	var request RefreshRequest
+// 	if err := c.Bind(&request); err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request"})
+// 	}
 
-	refreshToken := request.RefreshToken
+// 	refreshToken := request.RefreshToken
 
-	ctx := c.Request().Context()
+// 	ctx := c.Request().Context()
 
-	token, err := middleware.ParseJWT(refreshToken)
+// 	token, err := middleware.ParseJWT(refreshToken)
 
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": "invalid refresh token",
-		})
-	}
+// 	if err != nil {
+// 		return c.JSON(http.StatusUnauthorized, map[string]string{
+// 			"error": "invalid refresh token",
+// 		})
+// 	}
 
-	userID := token.UserID
+// 	userID := token.UserID
 
-	data, err := controller.service.RefreshToken(ctx, userID)
-	if err != nil {
-		response.WriteResponseSingleJSON(c, nil, err)
-		return err
-	}
+// 	data, err := controller.service.RefreshToken(ctx, userID)
+// 	if err != nil {
+// 		response.WriteResponseSingleJSON(c, nil, err)
+// 		return err
+// 	}
 
-	response.WriteResponseSingleJSON(c, data, nil)
+// 	response.WriteResponseSingleJSON(c, data, nil)
 
-	return err
-}
+// 	return err
+// }
 
 func (controller *AuthControllerImpl) AuthUserDetail(c echo.Context) error {
 	var err error
