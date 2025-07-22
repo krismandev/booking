@@ -19,6 +19,7 @@ type UserRepository interface {
 	GetUserList(limit int, offset int) ([]model.User, int64)
 	SetPassword(userId string, password string) error
 	FindUserByMerchantID(merchantID string) model.User
+	UpdateUser(dt model.User) error
 }
 
 type UserRepositoryImpl struct {
@@ -145,4 +146,12 @@ func (repo *UserRepositoryImpl) FindUserByMerchantID(merchantID string) model.Us
 	}
 
 	return user
+}
+
+func (repo *UserRepositoryImpl) UpdateUser(dt model.User) error {
+	var err error
+
+	err = repo.db.DB.Save(&model.User{ID: dt.ID, Name: dt.Name, Email: dt.Email, Password: dt.Password, UpdatedAt: dt.UpdatedAt}).Error
+
+	return err
 }

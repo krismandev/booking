@@ -87,7 +87,9 @@ func InitApp(app *Application) {
 	userService := service.NewUserService(userRepository, app.DB)
 	userController := controller.NewUserController(userService)
 
-	authService := service.NewAuthService(userRepository, app.DB)
+	roleRepository := repository.NewRoleRepository(app.DB)
+
+	authService := service.NewAuthService(userRepository, app.DB, roleRepository)
 	authController := controller.NewAuthController(authService)
 
 	routeConfig := route.RouteConfig{

@@ -153,13 +153,6 @@ func (service *userServiceImpl) ListUser(ctx context.Context, request request.Us
 func (service *userServiceImpl) UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error) {
 	var resp response.UpdateUserResponse
 
-	tx := service.dbConn.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
 	existingUser, err := service.repository.FindUserById(request.UserId)
 	if err != nil {
 		logrus.Errorf("Error : %v", err)
@@ -183,15 +176,21 @@ func (service *userServiceImpl) UpdateUser(ctx context.Context, request request.
 		existingUser.Password = &pwd
 	}
 
-	// err = service.repository.
+	timeNow := utils.TimeNowString()
+	existingUser.UpdatedAt = &timeNow
+
+	err = service.repository.UpdateUser(existingUser)
+	if err != nil {
+		logrus.Errorf("Failed to update user : %v", err)
+		return resp, err
+	}
 	// 	tx.Commit()
 
-	// resp.ID = user.ID
-	// resp.Name = user.Name
-	// resp.Email = user.Email
-	// resp.MerhchantId = user.MerchantID
-	// resp.Status = user.Status
-	// resp.CreatedTime = *user.CreatedTime
+	resp.ID = existingUser.ID
+	resp.Name = existingUser.Name
+	resp.Email = existingUser.Email
+	resp.CreatedAt = *existingUser.CreatedAt
+	resp.UpdatedAt = *existingUser.UpdatedAt
 
 	return resp, nil
 }
@@ -242,31 +241,31 @@ func (service *userServiceImpl) DeleteUser(ctx context.Context, id string) (resp
 }
 
 // set password for the first time
-func (service *userServiceImpl) SetPassword(ctx context.Context, token string, req request.SetPasswordRequest) error {
-	var err error
+// func (service *userServiceImpl) SetPassword(ctx context.Context, token string, req request.SetPasswordRequest) error {
+// 	var err error
 
-	merchant := service.merchantRepository.FindMerchantByVerifyToken(token)
-	if len(merchant.ID) == 0 {
-		logrus.Errorf("Error in Service : Merchant not found")
-		return &utils.BadRequestError{Message: "Merchant not found"}
-	}
+// 	merchant := service.merchantRepository.FindMerchantByVerifyToken(token)
+// 	if len(merchant.ID) == 0 {
+// 		logrus.Errorf("Error in Service : Merchant not found")
+// 		return &utils.BadRequestError{Message: "Merchant not found"}
+// 	}
 
-	user := service.repository.FindUserByMerchantID(merchant.ID)
-	if len(user.ID) == 0 {
-		logrus.Errorf("Error in Service : Merchant not found")
-		return &utils.BadRequestError{Message: "Merchant not found"}
-	}
+// 	user := service.repository.FindUserByMerchantID(merchant.ID)
+// 	if len(user.ID) == 0 {
+// 		logrus.Errorf("Error in Service : Merchant not found")
+// 		return &utils.BadRequestError{Message: "Merchant not found"}
+// 	}
 
-	if user.Password != nil {
-		logrus.Errorf("Password has already been set")
-		return &utils.ForbiddenError{Message: "Password has already been set"}
-	}
+// 	if user.Password != nil {
+// 		logrus.Errorf("Password has already been set")
+// 		return &utils.ForbiddenError{Message: "Password has already been set"}
+// 	}
 
-	password := utils.HashPassword(req.Password)
-	err = service.repository.SetPassword(user.ID, password)
-	if err != nil {
-		logrus.Errorf("Error in Service : Failed to set password %v", err)
-		return err
-	}
-	return err
-}
+// 	password := utils.HashPassword(req.Password)
+// 	err = service.repository.SetPassword(user.ID, password)
+// 	if err != nil {
+// 		logrus.Errorf("Error in Service : Failed to set password %v", err)
+// 		return err
+// 	}
+// 	return err
+// }

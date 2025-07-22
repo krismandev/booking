@@ -10,11 +10,12 @@ type CreateUserResponse struct {
 }
 
 type UserResponse struct {
-	ID        string   `json:"id"`
-	CreatedAt *string  `json:"createdAt"`
-	Email     string   `json:"email"`
-	Name      string   `json:"name"`
-	Roles     []string `json:"roles"`
+	ID        string    `json:"id"`
+	CreatedAt *string   `json:"createdAt"`
+	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	Roles     *[]string `json:"roles,omitempty"`
+	Role      string    `json:"role"`
 }
 
 func ToUserResponse(dt model.User) UserResponse {
@@ -33,4 +34,16 @@ type UpdateUserResponse struct {
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type AuthUserDetailResponse struct {
+	User UserResponse `json:"user"`
+	Role RoleResponse `json:"role"`
+}
+
+type RoleResponse struct {
+	ID         string   `json:"id"`
+	Name       string   `json:"name"`
+	Privileges []string `roles`
 }

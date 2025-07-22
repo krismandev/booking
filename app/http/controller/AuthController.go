@@ -9,12 +9,15 @@ import (
 	"booking/service"
 	"booking/utils"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 type AuthController interface {
 	Login(c echo.Context) error
 	RefreshToken(c echo.Context) error
+	AuthUserDetail(c echo.Context) error
 }
 
 type AuthControllerImpl struct {
@@ -93,6 +96,25 @@ func (controller *AuthControllerImpl) RefreshToken(c echo.Context) error {
 	}
 
 	response.WriteResponseSingleJSON(c, data, nil)
+
+	return err
+}
+
+func (controller *AuthControllerImpl) AuthUserDetail(c echo.Context) error {
+	var err error
+
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*middleware.JWTCustomClaims)
+
+	ctx := c.Request().Context()
+	data, err := controller.service.AuthUserDetail(ctx, claims.UserID)
+	if err != nil {
+		logrus.Errorf("Failed AuthUserDetail : %v", err)
+		response.WriteResponseSingleJSON(c, nil, err)
+		return err
+	}
+
+	response.WriteResponseSingleJSON(c, data, err)
 
 	return err
 }

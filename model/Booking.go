@@ -15,5 +15,4 @@ type BookingListQueryFilter struct {
 	Booking
 	RoomIDs    []string `json:"roomIds"`
 	LocationID []string `json:"locationIds"`
-	RoomID     string   `json:"roomId"`
 }
