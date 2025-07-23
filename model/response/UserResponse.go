@@ -43,9 +43,9 @@ type AuthUserDetailResponse struct {
 }
 
 type RoleResponse struct {
-	ID         string   `json:"id"`
-	Name       string   `json:"name"`
-	Privileges []string `roles`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Privileges string `privileges`
 }
 
 type UserListResponse struct {

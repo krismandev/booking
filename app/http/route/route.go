@@ -48,4 +48,6 @@ func (r *RouteConfig) InitPublicRoute() {
 	route.GET("/rooms", r.RoomController.GetRooms)
 
 	route.POST("/register", r.UserController.CreateUser)
+
+	// route.GET("/roles",)
 }

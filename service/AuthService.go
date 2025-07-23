@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 
 	"booking/app/http/middleware"
@@ -79,19 +80,6 @@ func (service *AuthServiceImpl) Login(ctx context.Context, req request.LoginRequ
 	return response, err
 }
 
-// func (service *AuthServiceImpl) RefreshToken(ctx context.Context, userID string) (map[string]any, error) {
-
-// 	newAccessToken, _, expiryTimeStr, err := middleware.GenerateJWT(userID)
-// 	if err != nil {
-// 		return map[string]any{"error": "could not generate token"}, err
-// 	}
-
-// 	return map[string]any{
-// 		"accessToken": newAccessToken,
-// 		"expiryTime":  expiryTimeStr,
-// 	}, err
-// }
-
 func (service *AuthServiceImpl) AuthUserDetail(ctx context.Context, userID string) (response.AuthUserDetailResponse, error) {
 	var resp response.AuthUserDetailResponse
 
@@ -112,14 +100,6 @@ func (service *AuthServiceImpl) AuthUserDetail(ctx context.Context, userID strin
 		return resp, err
 	}
 
-	var privileges []string
-
-	// err = json.Unmarshal([]byte(role.Privileges), &privileges)
-	// if err != nil {
-	// 	logrus.Errorf("Error when unmarshalling %v", err)
-	// 	return resp, err
-	// }
-
 	resp.User.ID = user.ID
 	resp.User.Name = user.Name
 	resp.User.Email = user.Email
@@ -128,7 +108,9 @@ func (service *AuthServiceImpl) AuthUserDetail(ctx context.Context, userID strin
 
 	resp.Role.ID = userRole.RoleID
 	resp.Role.Name = role.Name
-	resp.Role.Privileges = privileges
+
+	privilegesStr, _ := json.Marshal(role.Privileges)
+	resp.Role.Privileges = string(privilegesStr)
 
 	return resp, err
 }
