@@ -52,6 +52,10 @@ func (repository *BookingRepositoryImpl) GetBookings(filter model.BookingListQue
 		qry = qry.Where("roomid = ?", filter.RoomID)
 	}
 
+	if len(filter.Status) > 0 {
+		qry = qry.Where("status = ?", filter.Status)
+	}
+
 	err := qry.Find(&bookings).Error
 	if err != nil {
 		logrus.Errorf("Error in repository : %v", err)
