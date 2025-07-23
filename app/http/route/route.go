@@ -31,9 +31,13 @@ func (r *RouteConfig) InitPrivateRoute() {
 
 	r.Echo.GET("/auth/detail", r.AuthController.AuthUserDetail, middleware.JWTAuth(), authorizationMiddleware.Authorize("users.read"))
 
-	route := r.Echo.Group("/api", middleware.JWTAuth(), authorizationMiddleware.Authorize("user.create"))
-	route.POST("/booking", r.BookingController.CreateBooking)
-	// route.GET("/auth/detail", r.AuthController.AuthUserDetail)
+	// r.Echo.GET("/api")
+
+	route := r.Echo.Group("/api", middleware.JWTAuth())
+
+	route.POST("/booking", r.BookingController.CreateBooking, authorizationMiddleware.Authorize("booking.create"))
+	route.GET("/bookings", r.BookingController.GetBookings, authorizationMiddleware.Authorize("booking.read"))
+	route.DELETE("/booking/cancel", r.BookingController.CancelBooking, authorizationMiddleware.Authorize("booking.cancel"))
 
 }
 
@@ -42,7 +46,6 @@ func (r *RouteConfig) InitPublicRoute() {
 
 	route := r.Echo.Group("/api")
 	route.GET("/locations", r.LocationController.GetLocations)
-	route.GET("/bookings", r.BookingController.GetBookings)
 	route.GET("/rooms", r.RoomController.GetRooms)
 
 	route.POST("/register", r.UserController.CreateUser)

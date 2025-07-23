@@ -16,6 +16,7 @@ import (
 type BookingController interface {
 	GetBookings(c echo.Context) error
 	CreateBooking(c echo.Context) error
+	CancelBooking(c echo.Context) error
 }
 
 type BookingControllerImpl struct {
@@ -97,6 +98,45 @@ func (controller *BookingControllerImpl) CreateBooking(c echo.Context) error {
 		return err
 	}
 	resp.Data = createBookingResponse
+	response.WriteResponseSingleJSON(c, resp.Data, err)
+
+	return err
+}
+
+func (controller *BookingControllerImpl) CancelBooking(c echo.Context) error {
+	var err error
+
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*middleware.JWTCustomClaims)
+
+	var request request.CancelBookingRequest
+	var resp response.GlobalSingleResponse
+	err = utils.ParseRequestBody(c, &request)
+	if err != nil {
+		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{})
+		logrus.Errorf("Error in controller. Parsing error : %v", err)
+		return err
+	}
+
+	request.UserID = claims.UserID
+
+	if err = c.Validate(&request); err != nil {
+		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
+			Code:    400,
+			Message: utils.FormatValidationErrors(err),
+		})
+		logrus.Errorf("Error in controller. Validation error : %v", err)
+		return err
+	}
+
+	ctx := c.Request().Context()
+
+	err = controller.BookingService.CancelBooking(ctx, request)
+	if err != nil {
+		response.WriteResponseSingleJSON(c, nil, err)
+		logrus.Errorf("Failed to create booking : %v", err)
+		return err
+	}
 	response.WriteResponseSingleJSON(c, resp.Data, err)
 
 	return err

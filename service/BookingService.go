@@ -15,6 +15,7 @@ import (
 type BookingService interface {
 	GetBookings(ctx context.Context, request request.BookingListRequest) (response.BookingListResponse, error)
 	CreateBooking(ctx context.Context, request request.CreateBookingRequest) (response.BookingResponse, error)
+	CancelBooking(ctx context.Context, request request.CancelBookingRequest) error
 }
 
 type BookingServiceImpl struct {
@@ -125,4 +126,25 @@ func (service *BookingServiceImpl) CreateBooking(ctx context.Context, request re
 	resp = response.ToBookingResponse(data, nil, nil)
 
 	return resp, err
+}
+
+func (service *BookingServiceImpl) CancelBooking(ctx context.Context, request request.CancelBookingRequest) error {
+	var err error
+
+	booking := service.repository.FindBookingByID(request.BookingID, request.UserID)
+
+	if len(booking.ID) == 0 {
+		logrus.Errorf("Error in service. Booking not found : %v", err)
+		return &utils.NotFoundError{Message: "Data not found"}
+	}
+
+	booking.Status = model.CANCELED
+
+	err = service.repository.CancelBooking(booking)
+	if err != nil {
+		logrus.Errorf("Error in service. Failed to cancel booking : %v", err)
+		return &utils.InternalServerError{}
+	}
+
+	return err
 }

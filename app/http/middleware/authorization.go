@@ -3,7 +3,6 @@ package middleware
 import (
 	connection "booking/connection/database"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -67,7 +66,6 @@ func (m AuthorizationMiddleware) Authorize(accessIdentifier string) echo.Middlew
 			access := accessIdentifierMap[1]
 
 			for _, each := range *m.Roles {
-				fmt.Println(each)
 				if claims.RoleID == each.ID {
 					for _, elem := range each.PrivilegesMap {
 						if elem.Resource == resource {

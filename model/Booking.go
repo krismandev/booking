@@ -1,14 +1,21 @@
 package model
 
+const (
+	REQUESTED = "REQUESTED"
+	APPROVED  = "APPROVED"
+	CANCELED  = "CANCELED"
+)
+
 type Booking struct {
 	ID          string  `gorm:"column:id;default:uuid_generate_v4();primaryKey"`
-	RoomID      string  `json:"roomId" gorm:"column:roomid"`
-	Title       string  `json:"title" gorm:"column:title"`
-	Category    string  `json:"category" gorm:"column:category"`
-	Description *string `json:"description" gorm:"column:description"`
-	StartDate   string  `json:"startDate" gorm:"column:startdate"`
-	EndDate     string  `json:"endDate" gorm:"column:enddate"`
-	UserID      string  `json:"userId" gorm:"column:userid"`
+	RoomID      string  `gorm:"column:roomid"`
+	Title       string  `gorm:"column:title"`
+	Category    string  `gorm:"column:category"`
+	Description *string `gorm:"column:description"`
+	StartDate   string  `gorm:"column:startdate"`
+	EndDate     string  `gorm:"column:enddate"`
+	UserID      string  `gorm:"column:userid"`
+	Status      string  `gorm:"column:status"`
 }
 
 type BookingListQueryFilter struct {
