@@ -29,17 +29,17 @@ func (r *RouteConfig) InitPrivateRoute() {
 
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware(r.DB)
 
-	r.Echo.GET("/auth/detail", r.AuthController.AuthUserDetail, middleware.JWTAuth(), authorizationMiddleware.Authorize("user.read"))
+	r.Echo.GET("/auth/detail", r.AuthController.AuthUserDetail, middleware.JWTAuth(), authorizationMiddleware.Authorize("users.read"))
 
 	route := r.Echo.Group("/api", middleware.JWTAuth())
 
-	route.POST("/booking", r.BookingController.CreateBooking, authorizationMiddleware.Authorize("booking.create"))
-	route.GET("/bookings", r.BookingController.GetBookings, authorizationMiddleware.Authorize("booking.read"))
-	route.DELETE("/booking/cancel", r.BookingController.CancelBooking, authorizationMiddleware.Authorize("booking.cancel"))
-	route.POST("/booking/approval", r.BookingController.ApproveBooking, authorizationMiddleware.Authorize("booking.approval"))
+	route.POST("/bookings", r.BookingController.CreateBooking, authorizationMiddleware.Authorize("bookings.create"))
+	route.GET("/bookings", r.BookingController.GetBookings, authorizationMiddleware.Authorize("bookings.read"))
+	route.DELETE("/bookings/cancel", r.BookingController.CancelBooking, authorizationMiddleware.Authorize("bookings.cancel"))
+	route.POST("/bookings/approval", r.BookingController.ApproveBooking, authorizationMiddleware.Authorize("bookings.approval"))
 
-	route.POST("/user", r.UserController.CreateUser, authorizationMiddleware.Authorize("user.create"))
-	route.GET("/user", r.UserController.ListUser, authorizationMiddleware.Authorize("user.read"))
+	route.POST("/users", r.UserController.CreateUser, authorizationMiddleware.Authorize("users.create"))
+	route.GET("/users", r.UserController.ListUser, authorizationMiddleware.Authorize("users.read"))
 
 }
 
