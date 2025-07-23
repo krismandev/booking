@@ -13,7 +13,7 @@ import (
 )
 
 type RoomService interface {
-	GetRooms(ctx context.Context, request request.BookingListRequest) ([]response.RoomResponse, error)
+	GetRooms(ctx context.Context, request request.RoomListRequest) ([]response.RoomResponse, error)
 }
 
 type RoomServiceImpl struct {
@@ -28,7 +28,7 @@ func NewRoomService(repository repository.RoomRepository, locationRepository rep
 	}
 }
 
-func (service *RoomServiceImpl) GetRooms(ctx context.Context, request request.BookingListRequest) ([]response.RoomResponse, error) {
+func (service *RoomServiceImpl) GetRooms(ctx context.Context, request request.RoomListRequest) ([]response.RoomResponse, error) {
 	var output []response.RoomResponse
 
 	var filter model.ListRoomQueryFilter
