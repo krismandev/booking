@@ -5,8 +5,10 @@ import (
 )
 
 type GlobalListDataRequest struct {
-	Page  int `json:"page"`
-	Limit int `json:"limit"`
+	Page     int    `json:"page"`
+	Limit    int    `json:"limit"`
+	OrderBy  string `json:"orderBy"`
+	OrderDir string `json:"orderDir"`
 }
 
 func (r *GlobalListDataRequest) CollectMetadata(count int) (perPage int, currentPage int, totalPage int) {

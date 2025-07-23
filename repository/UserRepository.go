@@ -16,7 +16,7 @@ type UserRepository interface {
 	FindUserByEmail(tx *gorm.DB, email string) []model.User
 	FindOneUserByEmail(email string) (model.User, error)
 	FindUserById(userId string) (model.User, error)
-	GetUserList(limit int, offset int) ([]model.User, int64)
+	GetUserList(filter model.UserListQueryFilter) ([]model.User, int64)
 	SetPassword(userId string, password string) error
 	FindUserByMerchantID(merchantID string) model.User
 	UpdateUser(dt model.User) error
@@ -107,19 +107,32 @@ func (repo *UserRepositoryImpl) FindUserById(userId string) (model.User, error) 
 	return output, err
 }
 
-func (repo *UserRepositoryImpl) GetUserList(limit int, offset int) ([]model.User, int64) {
+func (repo *UserRepositoryImpl) GetUserList(filter model.UserListQueryFilter) ([]model.User, int64) {
 	var output []model.User
 	var count int64
 
-	result := repo.db.DB.Where(&model.User{}).Limit(limit).Offset(offset).Find(&output)
-	if result.Error != nil {
-		logrus.Errorf("GetUserList SQL Error : %v", result.Error)
+	qry := repo.db.DB.Scopes(repo.db.Order(filter.GlobalQueryFilter)).Scopes(repo.db.Paginate(filter.GlobalQueryFilter))
+	qry = qry.Model(&model.User{})
+
+	if len(filter.Name) == 0 {
+		qry = qry.Where("name like ?", "%"+filter.Name+"%")
+	}
+
+	err := qry.Find(&output).Error
+	if err != nil {
+		logrus.Errorf("Error in repository : %v", err)
 		return output, count
 	}
 
+	// result := repo.db.DB.Where(&model.User{}).Limit(limit).Offset(offset).Find(&output)
+	// if result.Error != nil {
+	// 	logrus.Errorf("GetUserList SQL Error : %v", result.Error)
+	// 	return output, count
+	// }
+
 	countResult := repo.db.DB.Where(&model.User{}).Count(&count)
 	if countResult.Error != nil {
-		logrus.Errorf("GetUserList SQL Error : %v", result.Error)
+		logrus.Errorf("Error in repository : %v", countResult.Error)
 		return output, count
 	}
 

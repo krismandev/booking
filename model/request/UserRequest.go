@@ -9,6 +9,7 @@ type CreateUserRequest struct {
 
 type UserListRequest struct {
 	GlobalListDataRequest
+	Filter string
 }
 
 type UpdateUserRequest struct {

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"math"
+	"net/url"
 	"time"
 
 	connection "booking/connection/database"
@@ -103,24 +103,24 @@ func (service *userServiceImpl) GetUser(ctx context.Context, id string) (respons
 	return resp, nil
 }
 
-func (service *userServiceImpl) ListUser(ctx context.Context, request request.UserListRequest) ([]response.UserResponse, int, int, int, int, error) {
-	var data []response.UserResponse
+// func (service *userServiceImpl) ListUser(ctx context.Context, request request.UserListRequest) ([]response.UserResponse, int, int, int, int, error) {
+// 	var data []response.UserResponse
 
-	limit := request.Limit
-	page := request.Page
-	offset := (page - 1) * limit
+// 	limit := request.Limit
+// 	page := request.Page
+// 	offset := (page - 1) * limit
 
-	users, count := service.repository.GetUserList(limit, offset)
+// 	users, count := service.repository.GetUserList(limit, offset)
 
-	for _, each := range users {
-		dt := response.ToUserResponse(each)
-		data = append(data, dt)
-	}
+// 	for _, each := range users {
+// 		dt := response.ToUserResponse(each)
+// 		data = append(data, dt)
+// 	}
 
-	totalPages := int(math.Ceil(float64(count) / float64(limit)))
+// 	totalPages := int(math.Ceil(float64(count) / float64(limit)))
 
-	return data, page, limit, totalPages, int(count), nil
-}
+// 	return data, page, limit, totalPages, int(count), nil
+// }
 
 func (service *userServiceImpl) UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error) {
 	var resp response.UpdateUserResponse
@@ -215,6 +215,41 @@ func (service *userServiceImpl) DeleteUser(ctx context.Context, id string) (resp
 func (service *userServiceImpl) GetUsers(ctx context.Context, request request.UserListRequest) (response.UserListResponse, error) {
 	var resp response.UserListResponse
 	var err error
+
+	// var filter model.UserListQueryFilter
+
+	var filter model.UserListQueryFilter
+
+	decodedFilter, err := url.QueryUnescape(request.Filter)
+	if err != nil {
+		return resp, err
+	}
+
+	if len(decodedFilter) > 0 {
+		err = utils.Decode(decodedFilter, &filter)
+		if err != nil {
+			logrus.Errorf("Error parsing filter: %v", err)
+			return resp, &utils.BadRequestError{Message: "Invalid filter format. must be encoded string of json"}
+		}
+	}
+
+	filter.Limit = request.Limit
+	filter.Page = request.Page
+	filter.OrderBy = request.OrderBy
+	filter.OrderDir = request.OrderDir
+
+	users, count := service.repository.GetUserList(filter)
+
+	limit, page, totalPages := request.CollectMetadata(int(count))
+
+	resp.Limit = limit
+	resp.Count = int(count)
+	resp.Page = page
+	resp.TotalPage = totalPages
+
+	for _, each := range users {
+		resp.Data = append(resp.Data, response.ToUserResponse(each))
+	}
 
 	return resp, err
 }

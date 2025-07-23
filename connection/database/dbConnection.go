@@ -1,10 +1,10 @@
 package connection
 
 import (
+	"booking/model"
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/labstack/gommon/log"
 	"github.com/sirupsen/logrus"
@@ -233,27 +233,19 @@ func (c DBConnection) GetRows(rows *sql.Rows) (map[int]map[string]string, int, e
 	return results, counter, nil
 }
 
-func (c DBConnection) Paginate(dataParams map[string]string) func(db *gorm.DB) *gorm.DB {
+func (c DBConnection) Paginate(filter model.GlobalQueryFilter) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		// q := r.URL.Query()
 		var limit int
-		if len(dataParams["limit"]) > 0 {
-			limitNumber, err := strconv.Atoi(dataParams["limit"])
-			if err != nil {
-				limit = 10
-			}
-			limit = limitNumber
+		if filter.Limit > 0 {
+			limit = filter.Limit
 		} else {
 			limit = 10
 		}
 
 		var page int
-		if len(dataParams["page"]) > 0 {
-			pageNumber, err := strconv.Atoi(dataParams["page"])
-			if err != nil {
-				page = 1
-			}
-			page = pageNumber
+		if filter.Limit > 1 {
+			page = filter.Page
 		} else {
 			page = 1
 		}
@@ -270,19 +262,16 @@ func (c DBConnection) Paginate(dataParams map[string]string) func(db *gorm.DB) *
 	}
 }
 
-func (c DBConnection) Order(dataParams map[string]string) func(db *gorm.DB) *gorm.DB {
+func (c DBConnection) Order(filter model.GlobalQueryFilter) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		// q := r.URL.Query()
 
-		if orderBy, ok := dataParams["orderBy"]; ok && len(dataParams["orderBy"]) > 0 {
-			if orderDir, dirOk := dataParams["orderDir"]; dirOk {
-				dir := "ASC"
-				if len(orderDir) > 0 {
-					dir = orderDir
-				}
-				return db.Order(orderBy + " " + dir)
+		if len(filter.OrderBy) > 0 {
+			dir := "ASC"
+			if len(filter.OrderDir) > 0 {
+				dir = filter.OrderDir
 			}
-			return db.Order(orderBy)
+			return db.Order(filter.OrderBy + " " + dir)
 		}
 
 		return db

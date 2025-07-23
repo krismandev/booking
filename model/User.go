@@ -14,3 +14,8 @@ type User struct {
 	Email     string  `gorm:"column:email"`
 	Name      string  `gorm:"column:name"`
 }
+
+type UserListQueryFilter struct {
+	GlobalQueryFilter
+	User
+}
