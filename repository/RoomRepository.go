@@ -8,7 +8,7 @@ import (
 )
 
 type RoomRepository interface {
-	GetRooms() []model.Room
+	GetRooms(filter model.ListRoomQueryFilter) []model.Room
 	GetRoomByIDs(roomIDs []string) []model.Room
 }
 
@@ -22,9 +22,15 @@ func NewRoomRepository(db *connection.DBConnection) RoomRepository {
 	}
 }
 
-func (repository *RoomRepositoryImpl) GetRooms() []model.Room {
+func (repository *RoomRepositoryImpl) GetRooms(filter model.ListRoomQueryFilter) []model.Room {
 	Rooms := []model.Room{}
-	err := repository.dbConn.DB.Model(&Rooms).Find(&Rooms).Error
+	qry := repository.dbConn.DB.Model(&Rooms)
+	if len(filter.LocationID) > 0 {
+		qry = qry.Where("locationId = ?", filter.LocationID)
+	}
+
+	err := qry.Find(&Rooms)
+
 	if err != nil {
 		logrus.Errorf("Error in repository : %v", err)
 	}

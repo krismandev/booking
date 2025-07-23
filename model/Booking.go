@@ -4,6 +4,7 @@ const (
 	REQUESTED = "REQUESTED"
 	APPROVED  = "APPROVED"
 	CANCELED  = "CANCELED"
+	REJECTED  = "REJECTED"
 )
 
 type Booking struct {

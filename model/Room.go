@@ -15,3 +15,7 @@ type Room struct {
 	CreatedAt  string `gorm:"column:createdat"`
 	UpdatedAt  string `gorm:"column:updatedat"`
 }
+
+type ListRoomQueryFilter struct {
+	LocationID string `gorm:"column:locationId"`
+}

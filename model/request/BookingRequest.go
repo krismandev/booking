@@ -19,3 +19,8 @@ type CancelBookingRequest struct {
 	BookingID string `json:"bookingId" validate:"required"`
 	UserID    string
 }
+
+type ApproveBookingRequest struct {
+	BookingID string `json:"bookingId" validate:"required"`
+	UserID    string
+}
