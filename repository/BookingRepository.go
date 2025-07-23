@@ -107,7 +107,7 @@ func (repository *BookingRepositoryImpl) FindBookingByID(bookingID, userID strin
 
 func (repo *BookingRepositoryImpl) ApproveBooking(dt model.Booking) error {
 	var err error
-	err = repo.dbConn.DB.Model(&dt).Select("status").Updates(model.Booking{Status: model.APPROVED}).Error
+	err = repo.dbConn.DB.Model(&dt).Select("status").Updates(model.Booking{Status: dt.Status}).Error
 	if err != nil {
 		logrus.Errorf("Error in repository : %v", err)
 	}

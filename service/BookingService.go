@@ -16,7 +16,7 @@ type BookingService interface {
 	GetBookings(ctx context.Context, request request.BookingListRequest) (response.BookingListResponse, error)
 	CreateBooking(ctx context.Context, request request.CreateBookingRequest) (response.BookingResponse, error)
 	CancelBooking(ctx context.Context, request request.CancelBookingRequest) error
-	ApproveBooking(ctx context.Context, request request.CancelBookingRequest) error
+	ApproveBooking(ctx context.Context, request request.ApproveBookingRequest) error
 }
 
 type BookingServiceImpl struct {
@@ -150,7 +150,7 @@ func (service *BookingServiceImpl) CancelBooking(ctx context.Context, request re
 	return err
 }
 
-func (service *BookingServiceImpl) ApproveBooking(ctx context.Context, request request.CancelBookingRequest) error {
+func (service *BookingServiceImpl) ApproveBooking(ctx context.Context, request request.ApproveBookingRequest) error {
 	var err error
 
 	booking := service.repository.FindBookingByID(request.BookingID, request.UserID)
@@ -160,9 +160,9 @@ func (service *BookingServiceImpl) ApproveBooking(ctx context.Context, request r
 		return &utils.NotFoundError{Message: "Data not found"}
 	}
 
-	booking.Status = model.APPROVED
+	booking.Status = request.Status
 
-	err = service.repository.CancelBooking(booking)
+	err = service.repository.ApproveBooking(booking)
 	if err != nil {
 		logrus.Errorf("Error in service. Failed to cancel booking : %v", err)
 		return &utils.InternalServerError{}
