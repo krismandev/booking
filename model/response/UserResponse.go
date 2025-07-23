@@ -42,12 +42,6 @@ type AuthUserDetailResponse struct {
 	Role RoleResponse `json:"role"`
 }
 
-type RoleResponse struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Privileges string `privileges`
-}
-
 type UserListResponse struct {
 	GlobalListDataResponse
 	Data []UserResponse

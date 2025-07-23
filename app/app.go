@@ -80,10 +80,10 @@ func InitApp(app *Application) {
 	roomController := controller.NewRoomController(roomService)
 
 	bookingRepository := repository.NewBookingRepository(app.DB)
-	bookingService := service.NewBookingService(bookingRepository, locationRepository, roomRepository)
-	bookingController := controller.NewBookingController(bookingService)
 
 	userRepository := repository.NewUserRepository(app.DB)
+	bookingService := service.NewBookingService(bookingRepository, locationRepository, roomRepository, userRepository)
+	bookingController := controller.NewBookingController(bookingService)
 
 	roleRepository := repository.NewRoleRepository(app.DB)
 	userService := service.NewUserService(userRepository, app.DB, roleRepository)
@@ -92,6 +92,9 @@ func InitApp(app *Application) {
 	authService := service.NewAuthService(userRepository, app.DB, roleRepository)
 	authController := controller.NewAuthController(authService)
 
+	roleService := service.NewRoleService(roleRepository)
+	roleController := controller.NewRoleController(roleService)
+
 	routeConfig := route.RouteConfig{
 		Echo:               app.Echo,
 		LocationController: locationController,
@@ -99,6 +102,7 @@ func InitApp(app *Application) {
 		BookingController:  bookingController,
 		UserController:     userController,
 		AuthController:     authController,
+		RoleController:     roleController,
 		DB:                 *app.DB,
 	}
 

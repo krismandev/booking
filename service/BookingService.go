@@ -22,14 +22,16 @@ type BookingService interface {
 type BookingServiceImpl struct {
 	repository         repository.BookingRepository
 	locationRepository repository.LocationRepository
+	userRepository     repository.UserRepository
 	roomRepository     repository.RoomRepository
 }
 
-func NewBookingService(repository repository.BookingRepository, locationRepository repository.LocationRepository, roomRepository repository.RoomRepository) BookingService {
+func NewBookingService(repository repository.BookingRepository, locationRepository repository.LocationRepository, roomRepository repository.RoomRepository, userRepository repository.UserRepository) BookingService {
 	return &BookingServiceImpl{
 		repository:         repository,
 		locationRepository: locationRepository,
 		roomRepository:     roomRepository,
+		userRepository:     userRepository,
 	}
 }
 
@@ -67,6 +69,16 @@ func (service *BookingServiceImpl) GetBookings(ctx context.Context, request requ
 
 	locations := service.locationRepository.GetLocationByIDs(locationIDs)
 
+	var userIDs []string
+	for _, each := range bookings {
+		userIDs = append(userIDs, each.UserID)
+	}
+	users, err := service.userRepository.FindUserByIDs(userIDs)
+	if err != nil {
+		logrus.Errorf("Error in service. Failed to retrieve user data : %v", err)
+		return resp, err
+	}
+
 	if len(bookings) > 0 {
 		for _, each := range bookings {
 			var room model.Room
@@ -84,7 +96,14 @@ func (service *BookingServiceImpl) GetBookings(ctx context.Context, request requ
 					break
 				}
 			}
-			single := response.ToBookingResponse(each, &room, &location)
+
+			var user model.User
+			for _, usr := range users {
+				if each.UserID == usr.ID {
+					user = usr
+				}
+			}
+			single := response.ToBookingResponse(each, &room, &location, &user)
 			resp.Data = append(resp.Data, single)
 		}
 	}
@@ -124,7 +143,7 @@ func (service *BookingServiceImpl) CreateBooking(ctx context.Context, request re
 		return resp, err
 	}
 
-	resp = response.ToBookingResponse(data, nil, nil)
+	resp = response.ToBookingResponse(data, nil, nil, nil)
 
 	return resp, err
 }

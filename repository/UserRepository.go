@@ -16,6 +16,7 @@ type UserRepository interface {
 	FindUserByEmail(tx *gorm.DB, email string) []model.User
 	FindOneUserByEmail(email string) (model.User, error)
 	FindUserById(userId string) (model.User, error)
+	FindUserByIDs(userIDs []string) ([]model.User, error)
 	GetUserList(filter model.UserListQueryFilter) ([]model.User, int64)
 	SetPassword(userId string, password string) error
 	FindUserByMerchantID(merchantID string) model.User
@@ -166,4 +167,17 @@ func (repo *UserRepositoryImpl) UpdateUser(dt model.User) error {
 	err = repo.db.DB.Save(&model.User{ID: dt.ID, Name: dt.Name, Email: dt.Email, Password: dt.Password, UpdatedAt: dt.UpdatedAt}).Error
 
 	return err
+}
+
+func (repository *UserRepositoryImpl) FindUserByIDs(userIDs []string) ([]model.User, error) {
+	var output []model.User
+	var err error
+
+	err = repository.db.DB.Where("id IN ?", userIDs).Find(&output).Error
+	if err != nil {
+		logrus.Errorf("Error in repository : %v", err)
+		return output, err
+	}
+
+	return output, err
 }

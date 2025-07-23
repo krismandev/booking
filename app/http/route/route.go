@@ -16,6 +16,7 @@ type RouteConfig struct {
 	BookingController  controller.BookingController
 	AuthController     controller.AuthController
 	UserController     controller.UserController
+	RoleController     controller.RoleController
 	DB                 connection.DBConnection
 }
 
@@ -29,7 +30,7 @@ func (r *RouteConfig) InitPrivateRoute() {
 
 	authorizationMiddleware := middleware.NewAuthorizationMiddleware(r.DB)
 
-	r.Echo.GET("/auth/detail", r.AuthController.AuthUserDetail, middleware.JWTAuth(), authorizationMiddleware.Authorize("users.read"))
+	r.Echo.GET("/auth/detail", r.AuthController.AuthUserDetail, middleware.JWTAuth(), authorizationMiddleware.Authorize("users.detail"))
 
 	route := r.Echo.Group("/api", middleware.JWTAuth())
 
@@ -51,6 +52,8 @@ func (r *RouteConfig) InitPublicRoute() {
 	route.GET("/rooms", r.RoomController.GetRooms)
 
 	route.POST("/register", r.UserController.CreateUser)
+
+	route.GET("/roles", r.RoleController.GetRoles)
 
 	// route.GET("/roles",)
 }
