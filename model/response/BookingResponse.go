@@ -13,6 +13,7 @@ type BookingResponse struct {
 	StartDate   string        `json:"startDate"`
 	EndDate     string        `json:"endDate"`
 	UserID      string        `json:"userId"`
+	Status      string        `json:"status"`
 	Room        *RoomResponse `json:"room,omitempty"`
 }
 
@@ -32,6 +33,7 @@ func ToBookingResponse(dt model.Booking, dtRoom *model.Room, dtLocation *model.L
 	resp.EndDate = dt.EndDate
 	resp.Title = dt.Title
 	resp.UserID = dt.UserID
+	resp.Status = dt.Status
 
 	if dtRoom != nil {
 		var room RoomResponse
