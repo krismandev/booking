@@ -29,15 +29,17 @@ type UserService interface {
 }
 
 type userServiceImpl struct {
-	repository repository.UserRepository
-	dbConn     *connection.DBConnection
-	config     *envcfg.Envcfg
+	repository     repository.UserRepository
+	roleRepository repository.RoleRepository
+	dbConn         *connection.DBConnection
+	config         *envcfg.Envcfg
 }
 
-func NewUserService(repository repository.UserRepository, dbConn *connection.DBConnection) UserService {
+func NewUserService(repository repository.UserRepository, dbConn *connection.DBConnection, roleRepository repository.RoleRepository) UserService {
 	return &userServiceImpl{
-		repository: repository,
-		dbConn:     dbConn,
+		repository:     repository,
+		dbConn:         dbConn,
+		roleRepository: roleRepository,
 	}
 }
 
@@ -63,55 +65,25 @@ func (service *userServiceImpl) CreateUser(ctx context.Context, req request.Crea
 	user.Password = &pwd
 	user.CreatedAt = &nowStr
 
-	tx := service.dbConn.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	id, err := service.repository.InsertUser(user)
+	if err != nil {
+		logrus.Errorf("Failed to create user : %v", err)
+		return resp, err
+	}
 
-	// if err := tx.Error; err != nil {
-	// 	logrus.Errorf("CreateUser Database Connection Error: %v", err)
-	// 	return resp, &utils.InternalServerError{
-	// 		Code:    500,
-	// 		Message: "Internal Server Error",
-	// 	}
-	// }
+	// userRole := model.UserRole{UserID: id, RoleID: req.RoleID}
 
-	// checkUser := service.repository.FindUserByEmail(tx, req.Email)
-	// if len(checkUser) > 0 {
-	// 	return resp, &utils.UnprocessableContentError{
-	// 		Code:    422,
-	// 		Message: "User with email " + req.Email + " already exists",
-	// 	}
-	// }
-
-	// if err := tx.Create(&user).Error; err != nil {
-	// 	logrus.Errorf("CreateUser Database Connection Error: %v", err)
-	// 	tx.Rollback()
-	// 	return resp, &utils.InternalServerError{
-	// 		Code:    500,
-	// 		Message: "Internal Server Error",
-	// 	}
-	// }
-
-	err = service.repository.InsertUser(tx, user)
-	tx.Commit()
+	err = service.roleRepository.CreateUserRole(id, req.RoleID)
+	if err != nil {
+		logrus.Errorf("Failed to create user role : %v", err)
+		return resp, err
+	}
 
 	resp.Id = user.ID
 	resp.Name = user.Name
 	resp.Email = user.Email
 	resp.CreatedTime = *user.CreatedAt
 
-	// mailReq := request.MailRequest{}
-	// mailReq.MailType = "userverification"
-	// mailReq.Subject = "Verification Mail"
-	// mailReq.To = req.Email
-	// mailReq.Url = service.config.GetString("appUrl") + "/verify/" + "verifyToken"
-
-	// encoded, err := json.Marshal(mailReq)
-	// jsonString := string(encoded)
-	// service.mailProducer.PublishMessage(jsonString)
 	return resp, err
 }
 

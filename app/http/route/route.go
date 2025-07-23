@@ -38,6 +38,8 @@ func (r *RouteConfig) InitPrivateRoute() {
 	route.DELETE("/booking/cancel", r.BookingController.CancelBooking, authorizationMiddleware.Authorize("booking.cancel"))
 	route.POST("/booking/approval", r.BookingController.ApproveBooking, authorizationMiddleware.Authorize("booking.approval"))
 
+	route.POST("/user", r.UserController.CreateUser, authorizationMiddleware.Authorize("user.create"))
+
 }
 
 func (r *RouteConfig) InitPublicRoute() {

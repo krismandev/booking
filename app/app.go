@@ -84,10 +84,10 @@ func InitApp(app *Application) {
 	bookingController := controller.NewBookingController(bookingService)
 
 	userRepository := repository.NewUserRepository(app.DB)
-	userService := service.NewUserService(userRepository, app.DB)
-	userController := controller.NewUserController(userService)
 
 	roleRepository := repository.NewRoleRepository(app.DB)
+	userService := service.NewUserService(userRepository, app.DB, roleRepository)
+	userController := controller.NewUserController(userService)
 
 	authService := service.NewAuthService(userRepository, app.DB, roleRepository)
 	authController := controller.NewAuthController(authService)

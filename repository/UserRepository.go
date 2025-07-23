@@ -10,7 +10,7 @@ import (
 )
 
 type UserRepository interface {
-	InsertUser(tx *gorm.DB, dt model.User) error
+	InsertUser(dt model.User) (string, error)
 	GetUser(userID string) map[string]string
 	DeleteUser(userID string) error
 	FindUserByEmail(tx *gorm.DB, email string) []model.User
@@ -32,14 +32,13 @@ func NewUserRepository(db *connection.DBConnection) UserRepository {
 	}
 }
 
-func (repository *UserRepositoryImpl) InsertUser(tx *gorm.DB, dt model.User) error {
-	err := tx.Exec("INSERT INTO users (createdat, password, email, name) VALUES (?,?,?,?) ",
-		dt.CreatedAt, dt.Password, dt.Email, dt.Name).Error
+func (repository *UserRepositoryImpl) InsertUser(dt model.User) (string, error) {
+	err := repository.db.DB.Create(&dt).Error
 	if err != nil {
 		logrus.Errorf("SQL Error : %v", err)
 	}
 
-	return err
+	return dt.ID, err
 }
 
 func (repository *UserRepositoryImpl) GetUser(userID string) map[string]string {
