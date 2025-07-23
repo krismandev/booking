@@ -31,8 +31,6 @@ func (r *RouteConfig) InitPrivateRoute() {
 
 	r.Echo.GET("/auth/detail", r.AuthController.AuthUserDetail, middleware.JWTAuth(), authorizationMiddleware.Authorize("users.read"))
 
-	// r.Echo.GET("/api")
-
 	route := r.Echo.Group("/api", middleware.JWTAuth())
 
 	route.POST("/booking", r.BookingController.CreateBooking, authorizationMiddleware.Authorize("booking.create"))

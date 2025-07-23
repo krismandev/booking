@@ -13,7 +13,7 @@ type BookingRepository interface {
 	CheckRoomAlreadyBooked(roomId string, startDateRequested string) bool
 	CancelBooking(model.Booking) error
 	ApproveBooking(model.Booking) error
-	FindBookingByID(bookingID, userID string) model.Booking
+	FindBookingByID(bookingID string) model.Booking
 }
 
 type BookingRepositoryImpl struct {
@@ -93,10 +93,10 @@ func (repository *BookingRepositoryImpl) CancelBooking(dt model.Booking) error {
 	return err
 }
 
-func (repository *BookingRepositoryImpl) FindBookingByID(bookingID, userID string) model.Booking {
+func (repository *BookingRepositoryImpl) FindBookingByID(bookingID string) model.Booking {
 	var dt model.Booking
 
-	err := repository.dbConn.DB.Where("id = ?", bookingID).Where("userid = ?", userID).First(&dt).Error
+	err := repository.dbConn.DB.Where("id = ?", bookingID).First(&dt).Error
 
 	if err != nil {
 		logrus.Errorf("Error in repository : %v", err)

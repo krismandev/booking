@@ -132,7 +132,7 @@ func (service *BookingServiceImpl) CreateBooking(ctx context.Context, request re
 func (service *BookingServiceImpl) CancelBooking(ctx context.Context, request request.CancelBookingRequest) error {
 	var err error
 
-	booking := service.repository.FindBookingByID(request.BookingID, request.UserID)
+	booking := service.repository.FindBookingByID(request.BookingID)
 
 	if len(booking.ID) == 0 {
 		logrus.Errorf("Error in service. Booking not found : %v", err)
@@ -153,7 +153,7 @@ func (service *BookingServiceImpl) CancelBooking(ctx context.Context, request re
 func (service *BookingServiceImpl) ApproveBooking(ctx context.Context, request request.ApproveBookingRequest) error {
 	var err error
 
-	booking := service.repository.FindBookingByID(request.BookingID, request.UserID)
+	booking := service.repository.FindBookingByID(request.BookingID)
 
 	if len(booking.ID) == 0 {
 		logrus.Errorf("Error in service. Booking not found : %v", err)

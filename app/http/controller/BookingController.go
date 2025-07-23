@@ -146,8 +146,8 @@ func (controller *BookingControllerImpl) CancelBooking(c echo.Context) error {
 func (controller *BookingControllerImpl) ApproveBooking(c echo.Context) error {
 	var err error
 
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*middleware.JWTCustomClaims)
+	// user := c.Get("user").(*jwt.Token)
+	// claims := user.Claims.(*middleware.JWTCustomClaims)
 
 	var request request.ApproveBookingRequest
 	var resp response.GlobalSingleResponse
@@ -158,7 +158,7 @@ func (controller *BookingControllerImpl) ApproveBooking(c echo.Context) error {
 		return err
 	}
 
-	request.UserID = claims.UserID
+	// request.UserID = claims.UserID
 
 	if err = c.Validate(&request); err != nil {
 		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
