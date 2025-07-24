@@ -18,3 +18,7 @@ type UpdateUserRequest struct {
 	Name     string `json:"name"`
 	Password string `json:"password" validate:"omitempty,min=8,max=20,password"`
 }
+
+type DeactivateUserRequest struct {
+	UserID string `json:"userId" validate:"required"`
+}

@@ -42,6 +42,7 @@ func (r *RouteConfig) InitPrivateRoute() {
 	route.POST("/users", r.UserController.CreateUser, authorizationMiddleware.Authorize("users.create"))
 	route.GET("/users", r.UserController.ListUser, authorizationMiddleware.Authorize("users.read"))
 	route.PATCH("/users", r.UserController.UpdateUser, authorizationMiddleware.Authorize("users.update"))
+	route.DELETE("/users", r.UserController.UpdateUser, authorizationMiddleware.Authorize("users.delete"))
 
 }
 

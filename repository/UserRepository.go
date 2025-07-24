@@ -21,6 +21,7 @@ type UserRepository interface {
 	SetPassword(userId string, password string) error
 	FindUserByMerchantID(merchantID string) model.User
 	UpdateUser(dt model.User) error
+	DeactivateUser(userID string) error
 }
 
 type UserRepositoryImpl struct {
@@ -184,4 +185,14 @@ func (repository *UserRepositoryImpl) FindUserByIDs(userIDs []string) ([]model.U
 	}
 
 	return output, err
+}
+
+func (repository *UserRepositoryImpl) DeactivateUser(userID string) error {
+	var err error
+
+	err = repository.db.DB.Where("id = ?", userID).Update("isactive", false).Error
+	if err != nil {
+		logrus.Errorf("Error in repository : %v", err)
+	}
+	return err
 }

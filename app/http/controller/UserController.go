@@ -15,6 +15,7 @@ type UserController interface {
 	// GetUser(c echo.Context) error
 	ListUser(c echo.Context) error
 	UpdateUser(c echo.Context) error
+	DeactivateUser(c echo.Context) error
 	// DeleteUser(c echo.Context) error
 	// SetPassword(c echo.Context) error
 }
@@ -133,6 +134,40 @@ func (controller *UserControllerImpl) UpdateUser(c echo.Context) error {
 	}
 
 	response.WriteResponseSingleJSON(c, data, err)
+
+	return err
+}
+
+func (controller *UserControllerImpl) DeactivateUser(c echo.Context) error {
+	var err error
+
+	ctx := c.Request().Context()
+
+	deactivateUserRequest := request.DeactivateUserRequest{}
+	err = utils.ParseRequestBody(c, &deactivateUserRequest)
+	if err != nil {
+		logrus.Errorf("Error in controller. Parsing error : %v", err)
+		return &utils.BadRequestError{
+			Message: "Invalid format",
+		}
+	}
+
+	if err := c.Validate(&deactivateUserRequest); err != nil {
+		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
+			Code:    400,
+			Message: utils.FormatValidationErrors(err),
+		})
+		return err
+	}
+
+	err = controller.service.DeactivateUser(ctx, deactivateUserRequest)
+	if err != nil {
+		logrus.Info("Error deactivating user : ", err)
+		response.WriteResponseSingleJSON(c, nil, err)
+		return err
+	}
+
+	response.WriteResponseSingleJSON(c, nil, err)
 
 	return err
 }

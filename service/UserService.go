@@ -25,6 +25,7 @@ type UserService interface {
 	// GetUser(ctx context.Context, id string) (response.CreateUserResponse, error)
 	GetUsers(ctx context.Context, request request.UserListRequest) (response.UserListResponse, error)
 	UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error)
+	DeactivateUser(ctx context.Context, request request.DeactivateUserRequest) error
 	// DeleteUser(ctx context.Context, id string) (response.GlobalJSONResponse, error)
 	// SetPassword(ctx context.Context, token string, req request.SetPasswordRequest) error
 }
@@ -269,32 +270,20 @@ func (service *userServiceImpl) GetUsers(ctx context.Context, request request.Us
 	return resp, err
 }
 
-// set password for the first time
-// func (service *userServiceImpl) SetPassword(ctx context.Context, token string, req request.SetPasswordRequest) error {
-// 	var err error
+func (service *userServiceImpl) DeactivateUser(ctx context.Context, request request.DeactivateUserRequest) error {
+	var err error
 
-// 	merchant := service.merchantRepository.FindMerchantByVerifyToken(token)
-// 	if len(merchant.ID) == 0 {
-// 		logrus.Errorf("Error in Service : Merchant not found")
-// 		return &utils.BadRequestError{Message: "Merchant not found"}
-// 	}
+	user, err := service.repository.FindUserById(request.UserID)
+	if err != nil || len(user.ID) == 0 {
+		logrus.Errorf("User not found : %v", err)
+		return &utils.NotFoundError{Message: "User not found"}
+	}
 
-// 	user := service.repository.FindUserByMerchantID(merchant.ID)
-// 	if len(user.ID) == 0 {
-// 		logrus.Errorf("Error in Service : Merchant not found")
-// 		return &utils.BadRequestError{Message: "Merchant not found"}
-// 	}
+	err = service.repository.DeactivateUser(user.ID)
+	if err != nil {
+		logrus.Errorf("Failed to deactivate user : %v", err)
+		return err
+	}
 
-// 	if user.Password != nil {
-// 		logrus.Errorf("Password has already been set")
-// 		return &utils.ForbiddenError{Message: "Password has already been set"}
-// 	}
-
-// 	password := utils.HashPassword(req.Password)
-// 	err = service.repository.SetPassword(user.ID, password)
-// 	if err != nil {
-// 		logrus.Errorf("Error in Service : Failed to set password %v", err)
-// 		return err
-// 	}
-// 	return err
-// }
+	return err
+}
