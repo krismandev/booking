@@ -21,6 +21,7 @@ type Booking struct {
 
 type BookingListQueryFilter struct {
 	Booking
+	GlobalQueryFilter
 	RoomIDs    []string `json:"roomIds"`
 	LocationID []string `json:"locationIds"`
 }

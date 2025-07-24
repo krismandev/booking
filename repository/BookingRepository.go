@@ -29,7 +29,7 @@ func NewBookingRepository(db *connection.DBConnection) BookingRepository {
 func (repository *BookingRepositoryImpl) GetBookings(filter model.BookingListQueryFilter) []model.Booking {
 	bookings := []model.Booking{}
 
-	qry := repository.dbConn.DB.Model(&bookings)
+	qry := repository.dbConn.DB.Model(&bookings).Scopes(repository.dbConn.Paginate(filter.GlobalQueryFilter), repository.dbConn.Order(filter.GlobalQueryFilter))
 
 	if len(filter.StartDate) > 0 {
 		qry = qry.Where("startDate >= ?", filter.StartDate)
