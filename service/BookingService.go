@@ -136,6 +136,7 @@ func (service *BookingServiceImpl) CreateBooking(ctx context.Context, request re
 	data.EndDate = request.EndDate
 	data.RoomID = request.RoomID
 	data.Title = request.Title
+	data.Status = model.REQUESTED
 
 	err = service.repository.CreateBooking(&data)
 	if err != nil {
