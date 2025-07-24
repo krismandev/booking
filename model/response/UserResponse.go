@@ -16,6 +16,7 @@ type UserResponse struct {
 	Name      string    `json:"name"`
 	Roles     *[]string `json:"roles,omitempty"`
 	Role      *string   `json:"role,omitempty"`
+	IsActive  bool      `json:"isActive"`
 }
 
 func ToUserResponse(dt model.User, role *model.Role) UserResponse {
@@ -25,6 +26,7 @@ func ToUserResponse(dt model.User, role *model.Role) UserResponse {
 	resp.Email = dt.Email
 	resp.Name = dt.Name
 	resp.CreatedAt = dt.CreatedAt
+	resp.IsActive = dt.IsActive
 
 	if role != nil {
 		resp.Role = &role.Name

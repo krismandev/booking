@@ -13,7 +13,7 @@ type User struct {
 	Password  *string `gorm:"column:password"`
 	Email     string  `gorm:"column:email"`
 	Name      string  `gorm:"column:name"`
-	IsActive  bool    `gorm:"isactive"`
+	IsActive  bool    `gorm:"column:isactive"`
 }
 
 type UserListQueryFilter struct {
