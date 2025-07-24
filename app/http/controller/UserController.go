@@ -7,13 +7,14 @@ import (
 	"booking/utils"
 
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 type UserController interface {
 	CreateUser(c echo.Context) error
 	// GetUser(c echo.Context) error
 	ListUser(c echo.Context) error
-	// UpdateUser(c echo.Context) error
+	UpdateUser(c echo.Context) error
 	// DeleteUser(c echo.Context) error
 	// SetPassword(c echo.Context) error
 }
@@ -89,6 +90,49 @@ func (controller *UserControllerImpl) ListUser(c echo.Context) error {
 	}
 
 	response.WriteResponseListJSON(c, responseList, err)
+
+	return err
+}
+
+func (controller *UserControllerImpl) UpdateUser(c echo.Context) error {
+
+	var err error
+
+	ctx := c.Request().Context()
+
+	updateUserRequest := request.UpdateUserRequest{}
+	err = utils.ParseRequestBody(c, &updateUserRequest)
+	if err != nil {
+		logrus.Errorf("Error in controller. Parsing error : %v", err)
+		return &utils.BadRequestError{
+			Message: "Invalid format",
+		}
+	}
+
+	if err := c.Validate(&updateUserRequest); err != nil {
+		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
+			Code:    400,
+			Message: utils.FormatValidationErrors(err),
+		})
+		return err
+	}
+
+	if !utils.IsValidUUID(updateUserRequest.UserId) {
+		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
+			Code:    400,
+			Message: "Invalid ID Fromat",
+		})
+		return err
+	}
+
+	data, err := controller.service.UpdateUser(ctx, updateUserRequest)
+	if err != nil {
+		logrus.Info("Error updating user : ", err)
+		response.WriteResponseSingleJSON(c, nil, err)
+		return err
+	}
+
+	response.WriteResponseSingleJSON(c, data, err)
 
 	return err
 }

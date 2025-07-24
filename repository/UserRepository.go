@@ -165,6 +165,10 @@ func (repo *UserRepositoryImpl) UpdateUser(dt model.User) error {
 	var err error
 
 	err = repo.db.DB.Save(&model.User{ID: dt.ID, Name: dt.Name, Email: dt.Email, Password: dt.Password, UpdatedAt: dt.UpdatedAt}).Error
+	if err != nil {
+		logrus.Errorf("Error in repository : %v", err)
+		return err
+	}
 
 	return err
 }

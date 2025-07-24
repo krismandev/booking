@@ -108,6 +108,14 @@ func (service *BookingServiceImpl) GetBookings(ctx context.Context, request requ
 		}
 	}
 
+	count, _ := service.repository.CountBooking(filter)
+
+	perPage, currentPage, totalPage := request.CollectMetadata(int(count))
+	resp.Count = int(count)
+	resp.Limit = perPage
+	resp.TotalPage = totalPage
+	resp.Page = currentPage
+
 	return resp, err
 }
 
@@ -126,6 +134,12 @@ func (service *BookingServiceImpl) CreateBooking(ctx context.Context, request re
 	if alreadyBooked {
 		logrus.Errorf("Error in service. Room Already booked : %v", err)
 		return resp, &utils.UnprocessableContentError{Message: "Room already booked at given time"}
+	}
+
+	user, err := service.userRepository.FindUserById(request.UserID)
+	if !user.IsActive {
+		logrus.Errorf("User Inactive! You are not allowed to booking a room")
+		return resp, &utils.ForbiddenError{Message: "User Inactive! You are not allowed to booking a room"}
 	}
 
 	var data model.Booking

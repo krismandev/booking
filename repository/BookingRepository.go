@@ -14,6 +14,7 @@ type BookingRepository interface {
 	CancelBooking(model.Booking) error
 	ApproveBooking(model.Booking) error
 	FindBookingByID(bookingID string) model.Booking
+	CountBooking(filter model.BookingListQueryFilter) (int64, error)
 }
 
 type BookingRepositoryImpl struct {
@@ -113,4 +114,43 @@ func (repo *BookingRepositoryImpl) ApproveBooking(dt model.Booking) error {
 	}
 
 	return err
+}
+
+func (repository *BookingRepositoryImpl) CountBooking(filter model.BookingListQueryFilter) (int64, error) {
+	var count int64
+	var err error
+
+	qry := repository.dbConn.DB.Model(&model.Booking{})
+
+	if len(filter.StartDate) > 0 {
+		qry = qry.Where("startDate >= ?", filter.StartDate)
+	}
+	if len(filter.Title) > 0 {
+		qry = qry.Where("title like ?", "%"+filter.Title+"%")
+	}
+	if len(filter.EndDate) > 0 {
+		qry = qry.Where("endDate <= ?", filter.EndDate)
+	}
+	if len(filter.Category) > 0 {
+		qry = qry.Where("category = ?", filter.Category)
+	}
+
+	if len(filter.LocationID) > 0 {
+		qry = qry.Where("locationid IN ?", filter.LocationID)
+	}
+
+	if len(filter.RoomID) > 0 {
+		qry = qry.Where("roomid = ?", filter.RoomID)
+	}
+
+	if len(filter.Status) > 0 {
+		qry = qry.Where("status = ?", filter.Status)
+	}
+
+	err = qry.Count(&count).Error
+	if err != nil {
+		logrus.Errorf("Error in repository : %v", err)
+		return count, err
+	}
+	return count, err
 }

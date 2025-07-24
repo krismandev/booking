@@ -24,7 +24,7 @@ type UserService interface {
 	CreateUser(ctx context.Context, request request.CreateUserRequest) (response.CreateUserResponse, error)
 	// GetUser(ctx context.Context, id string) (response.CreateUserResponse, error)
 	GetUsers(ctx context.Context, request request.UserListRequest) (response.UserListResponse, error)
-	// UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error)
+	UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error)
 	// DeleteUser(ctx context.Context, id string) (response.GlobalJSONResponse, error)
 	// SetPassword(ctx context.Context, token string, req request.SetPasswordRequest) error
 }

@@ -14,7 +14,7 @@ type UserListRequest struct {
 
 type UpdateUserRequest struct {
 	UserId   string `json:"userId" validate:"required"`
-	Email    string `json:"email" validate:"omitempty,email"`
+	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password" validate:"omitempty,min=8,max=20,password"`
 }
