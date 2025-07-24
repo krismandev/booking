@@ -5,7 +5,7 @@ import "booking/model"
 type RoleResponse struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
-	Privileges string `privileges`
+	Privileges string `json:"privileges"`
 }
 
 func ToRoleResponse(dt model.Role) RoleResponse {
