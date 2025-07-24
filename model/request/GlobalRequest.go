@@ -2,18 +2,19 @@ package request
 
 import (
 	"math"
+	"strconv"
 )
 
 type GlobalListDataRequest struct {
-	Page     int    `json:"page"`
-	Limit    int    `json:"limit"`
+	Page     string `json:"page"`
+	Limit    string `json:"limit"`
 	OrderBy  string `json:"orderBy"`
 	OrderDir string `json:"orderDir"`
 }
 
 func (r *GlobalListDataRequest) CollectMetadata(count int) (perPage int, currentPage int, totalPage int) {
-	limit := r.Limit
-	page := r.Page
+	limit, _ := strconv.Atoi(r.Limit)
+	page, _ := strconv.Atoi(r.Page)
 
 	if limit == 0 {
 		limit = 10

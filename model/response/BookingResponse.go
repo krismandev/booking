@@ -45,7 +45,7 @@ func ToBookingResponse(dt model.Booking, dtRoom *model.Room, dtLocation *model.L
 
 	if dtUser != nil {
 		var userResp UserResponse
-		userResp = ToUserResponse(*dtUser)
+		userResp = ToUserResponse(*dtUser, nil)
 
 		resp.User = &userResp
 	}

@@ -5,7 +5,6 @@ import (
 	"booking/model/response"
 	"booking/service"
 	"booking/utils"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -70,32 +69,9 @@ func (controller *UserControllerImpl) ListUser(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	var request request.UserListRequest
-
-	limit, err := strconv.Atoi(c.QueryParams().Get("limit"))
-	if limit >= 0 {
-		limit = 10
-		request.Limit = limit
-	}
-	if err != nil {
-		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
-			Code:    400,
-			Message: "Limit must be number",
-		})
-		return err
-	}
-
-	page, err := strconv.Atoi(c.QueryParams().Get("page"))
-	if page >= 0 {
-		page = 1
-		request.Page = page
-	}
-	if err != nil {
-		response.WriteResponseSingleJSON(c, nil, &utils.BadRequestError{
-			Code:    400,
-			Message: "Page must be number",
-		})
-		return err
-	}
+	request.Limit = c.QueryParams().Get("limit")
+	request.Page = c.QueryParams().Get("page")
+	request.Filter = c.QueryParams().Get("filter")
 
 	resp, err := controller.service.GetUsers(ctx, request)
 	if err != nil {

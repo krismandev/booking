@@ -6,7 +6,6 @@ import (
 	"booking/model/response"
 	"booking/service"
 	"booking/utils"
-	"strconv"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -38,15 +37,8 @@ func (controller *BookingControllerImpl) GetBookings(c echo.Context) error {
 	var req request.BookingListRequest
 	limit := c.QueryParams().Get("limit")
 
-	limitInt, err := strconv.Atoi(limit)
-	if err != nil {
-		limitInt = 0
-	}
-	req.Limit = limitInt
-	page, err := strconv.Atoi(c.QueryParams().Get("page"))
-	if err != nil {
-		page = 0
-	}
+	req.Limit = limit
+	page := c.QueryParams().Get("page")
 	req.Page = page
 	req.Filter = c.QueryParams().Get("filter")
 

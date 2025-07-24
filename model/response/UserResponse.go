@@ -15,16 +15,20 @@ type UserResponse struct {
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
 	Roles     *[]string `json:"roles,omitempty"`
-	Role      string    `json:"role"`
+	Role      *string   `json:"role,omitempty"`
 }
 
-func ToUserResponse(dt model.User) UserResponse {
+func ToUserResponse(dt model.User, role *model.Role) UserResponse {
 	var resp UserResponse
 
 	resp.ID = dt.ID
 	resp.Email = dt.Email
 	resp.Name = dt.Name
 	resp.CreatedAt = dt.CreatedAt
+
+	if role != nil {
+		resp.Role = &role.Name
+	}
 
 	return resp
 }

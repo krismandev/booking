@@ -104,7 +104,7 @@ func (service *AuthServiceImpl) AuthUserDetail(ctx context.Context, userID strin
 	resp.User.Name = user.Name
 	resp.User.Email = user.Email
 	resp.User.CreatedAt = user.CreatedAt
-	resp.User.Role = role.Name
+	resp.User.Role = &role.Name
 
 	resp.Role.ID = userRole.RoleID
 	resp.Role.Name = role.Name

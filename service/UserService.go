@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/url"
+	"strconv"
 	"time"
 
 	connection "booking/connection/database"
@@ -98,7 +99,7 @@ func (service *userServiceImpl) GetUser(ctx context.Context, id string) (respons
 		}
 	}
 
-	resp = response.ToUserResponse(user)
+	resp = response.ToUserResponse(user, nil)
 
 	return resp, nil
 }
@@ -233,12 +234,20 @@ func (service *userServiceImpl) GetUsers(ctx context.Context, request request.Us
 		}
 	}
 
-	filter.Limit = request.Limit
-	filter.Page = request.Page
+	limit, _ := strconv.Atoi(request.Limit)
+	filter.Limit = limit
+	page, _ := strconv.Atoi(request.Page)
+	filter.Page = page
 	filter.OrderBy = request.OrderBy
 	filter.OrderDir = request.OrderDir
 
 	users, count := service.repository.GetUserList(filter)
+
+	var userIDs []string
+	for _, each := range users {
+		userIDs = append(userIDs, each.ID)
+	}
+	usersRole := service.roleRepository.GetListUserRole(userIDs)
 
 	limit, page, totalPages := request.CollectMetadata(int(count))
 
@@ -248,7 +257,13 @@ func (service *userServiceImpl) GetUsers(ctx context.Context, request request.Us
 	resp.TotalPage = totalPages
 
 	for _, each := range users {
-		resp.Data = append(resp.Data, response.ToUserResponse(each))
+		var userRole model.UserRole
+		for _, ur := range usersRole {
+			if each.ID == ur.UserID {
+				userRole = ur
+			}
+		}
+		resp.Data = append(resp.Data, response.ToUserResponse(each, &userRole.Role))
 	}
 
 	return resp, err

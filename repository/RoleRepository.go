@@ -13,6 +13,7 @@ type RoleRepository interface {
 	GetRoleByIDs(roleIDs []string) []model.Role
 	GetRoleByID(roleID string) model.Role
 	CreateUserRole(userID, roleID string) error
+	GetListUserRole(userIDs []string) []model.UserRole
 }
 
 type RoleRepositoryImpl struct {
@@ -77,4 +78,16 @@ func (repository *RoleRepositoryImpl) CreateUserRole(userID, roleID string) erro
 	}
 
 	return err
+}
+
+func (repository *RoleRepositoryImpl) GetListUserRole(userIDs []string) []model.UserRole {
+	var output []model.UserRole
+
+	err := repository.dbConn.DB.Preload("Role").Where("userid IN ?", userIDs).Find(&output).Error
+
+	if err != nil {
+		logrus.Errorf("Error in repository : %v", err)
+	}
+
+	return output
 }
