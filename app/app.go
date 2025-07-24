@@ -31,46 +31,6 @@ type AccessPermission struct {
 
 func InitApp(app *Application) {
 
-	// cfg, err := envcfg.New(envcfg.ConfigFile("./config"))
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// var (
-	// 	exchange = "mpg"
-	// 	// exchangeType         = string(rabbitmq.ExchangeType_DIRECT)
-	// 	mailRequestQueueName = "mpg.mail.request"
-	// )
-
-	// validator := validator.New()
-
-	// mailProducer, err := rabbitmq.NewProducer(cfg.GetString("amqp.url"), mailRequestQueueName, rabbitmq.WithExchange(exchange))
-	// if err != nil {
-	// 	logrus.Errorf("failed start worker %v", err)
-	// 	panic(err)
-	// }
-
-	// commonhttpConfig := api.Config{}
-	// httpClient, err := api.New(commonhttpConfig)
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// // proxyUrl := cfg.GetString("proxyUrl")
-	// // httpConfigExternalClient := api.Config{UseProxy: true, ProxyURL: proxyUrl, LogReqResBodyEnable: true}
-	// // externalHttpClient, err := api.New(httpConfigExternalClient)
-	// // if err != nil {
-	// // 	panic(err)
-	// // }
-
-	// cacheRepository := repository.NewCacheRepository(app.Redis)
-
-	// storagePath := cfg.GetString("documentFilepath")
-	// fileStorageRepository := repository.NewFileStorageRepository(storagePath)
-	// if fileStorageRepository == nil {
-	// 	logrus.Fatal("Failed to initialize fileStorageRepository")
-	// }
-
 	locationRepository := repository.NewLocationRepository(app.DB)
 	locationService := service.NewLocationService(locationRepository)
 	locationController := controller.NewLocationController(locationService)
@@ -95,15 +55,20 @@ func InitApp(app *Application) {
 	roleService := service.NewRoleService(roleRepository)
 	roleController := controller.NewRoleController(roleService)
 
+	departmentRepository := repository.NewDepartmentRepository(app.DB)
+	departmentService := service.NewDepartmentService(departmentRepository)
+	departmentController := controller.NewDepartmentController(departmentService)
+
 	routeConfig := route.RouteConfig{
-		Echo:               app.Echo,
-		LocationController: locationController,
-		RoomController:     roomController,
-		BookingController:  bookingController,
-		UserController:     userController,
-		AuthController:     authController,
-		RoleController:     roleController,
-		DB:                 *app.DB,
+		Echo:                 app.Echo,
+		LocationController:   locationController,
+		RoomController:       roomController,
+		BookingController:    bookingController,
+		UserController:       userController,
+		AuthController:       authController,
+		RoleController:       roleController,
+		DepartmentController: departmentController,
+		DB:                   *app.DB,
 	}
 
 	routeConfig.InitRoute()

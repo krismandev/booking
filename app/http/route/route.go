@@ -10,14 +10,15 @@ import (
 )
 
 type RouteConfig struct {
-	Echo               *echo.Echo
-	LocationController controller.LocationController
-	RoomController     controller.RoomController
-	BookingController  controller.BookingController
-	AuthController     controller.AuthController
-	UserController     controller.UserController
-	RoleController     controller.RoleController
-	DB                 connection.DBConnection
+	Echo                 *echo.Echo
+	LocationController   controller.LocationController
+	RoomController       controller.RoomController
+	BookingController    controller.BookingController
+	AuthController       controller.AuthController
+	UserController       controller.UserController
+	RoleController       controller.RoleController
+	DepartmentController controller.DepartmentController
+	DB                   connection.DBConnection
 }
 
 func (r *RouteConfig) InitRoute() {
@@ -57,5 +58,7 @@ func (r *RouteConfig) InitPublicRoute() {
 	route.GET("/roles", r.RoleController.GetRoles)
 
 	route.GET("/bookings", r.BookingController.GetBookings)
+
+	route.GET("/departments", r.DepartmentController.GetDepartments)
 	// route.GET("/roles",)
 }
