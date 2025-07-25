@@ -24,6 +24,7 @@ type UserService interface {
 	CreateUser(ctx context.Context, request request.CreateUserRequest) (response.CreateUserResponse, error)
 	// GetUser(ctx context.Context, id string) (response.CreateUserResponse, error)
 	GetUsers(ctx context.Context, request request.UserListRequest) (response.UserListResponse, error)
+	UserByID(ctx context.Context, id string) (response.UserResponse, error)
 	UpdateUser(ctx context.Context, request request.UpdateUserRequest) (response.UpdateUserResponse, error)
 	DeactivateUser(ctx context.Context, request request.DeactivateUserRequest) error
 	// DeleteUser(ctx context.Context, id string) (response.GlobalJSONResponse, error)
@@ -286,4 +287,21 @@ func (service *userServiceImpl) DeactivateUser(ctx context.Context, request requ
 	}
 
 	return err
+}
+
+func (service *userServiceImpl) UserByID(ctx context.Context, id string) (response.UserResponse, error) {
+	var resp response.UserResponse
+	var err error
+
+	user, err := service.repository.FindUserById(id)
+	if err != nil {
+		logrus.Errorf("Error in service. Failed to get user data", err)
+		return resp, err
+	}
+
+	role := service.roleRepository.GetUserRole(id)
+
+	resp = response.ToUserResponse(user, &role.Role)
+
+	return resp, err
 }

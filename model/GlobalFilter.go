@@ -1,8 +1,8 @@
 package model
 
 type GlobalQueryFilter struct {
-	Page     int
-	Limit    int
-	OrderDir string
-	OrderBy  string
+	Page     int    `json:"page"`
+	Limit    int    `json:"limit"`
+	OrderDir string `json:"orderDir"`
+	OrderBy  string `json:"orderBy"`
 }

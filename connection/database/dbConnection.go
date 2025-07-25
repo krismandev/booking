@@ -244,7 +244,7 @@ func (c DBConnection) Paginate(filter model.GlobalQueryFilter) func(db *gorm.DB)
 		}
 
 		var page int
-		if filter.Limit > 1 {
+		if filter.Page > 1 {
 			page = filter.Page
 		} else {
 			page = 1

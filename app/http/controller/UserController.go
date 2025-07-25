@@ -14,6 +14,7 @@ type UserController interface {
 	CreateUser(c echo.Context) error
 	// GetUser(c echo.Context) error
 	ListUser(c echo.Context) error
+	UserByID(c echo.Context) error
 	UpdateUser(c echo.Context) error
 	DeactivateUser(c echo.Context) error
 	// DeleteUser(c echo.Context) error
@@ -169,5 +170,23 @@ func (controller *UserControllerImpl) DeactivateUser(c echo.Context) error {
 
 	response.WriteResponseSingleJSON(c, nil, err)
 
+	return err
+}
+
+func (controller *UserControllerImpl) UserByID(c echo.Context) error {
+	var err error
+
+	ctx := c.Request().Context()
+
+	userId := c.Param("id")
+
+	data, err := controller.service.UserByID(ctx, userId)
+	if err != nil {
+		logrus.Info("Error in controller. Failed get user data : ", err)
+		response.WriteResponseSingleJSON(c, nil, err)
+		return err
+	}
+
+	response.WriteResponseSingleJSON(c, data, err)
 	return err
 }
