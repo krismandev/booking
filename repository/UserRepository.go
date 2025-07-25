@@ -113,10 +113,9 @@ func (repo *UserRepositoryImpl) GetUserList(filter model.UserListQueryFilter) ([
 	var output []model.User
 	var count int64
 
-	qry := repo.db.DB.Scopes(repo.db.Order(filter.GlobalQueryFilter)).Scopes(repo.db.Paginate(filter.GlobalQueryFilter))
-	qry = qry.Model(&model.User{})
+	qry := repo.db.DB.Model(&output).Scopes(repo.db.Order(filter.GlobalQueryFilter)).Scopes(repo.db.Paginate(filter.GlobalQueryFilter))
 
-	if len(filter.Name) == 0 {
+	if len(filter.Name) > 0 {
 		qry = qry.Where("name like ?", "%"+filter.Name+"%")
 	}
 
