@@ -7,6 +7,7 @@ import (
 	"booking/repository"
 	"booking/utils"
 	"context"
+	"encoding/json"
 	"net/url"
 
 	"github.com/sirupsen/logrus"
@@ -51,6 +52,11 @@ func (service *BookingServiceImpl) GetBookings(ctx context.Context, request requ
 			logrus.Errorf("Error parsing filter: %v", err)
 			return resp, &utils.BadRequestError{Message: "Invalid filter format. must be encoded string of json"}
 		}
+	}
+
+	dttbFilter := request.GlobalListDataRequest.ParseToJson()
+	if len(dttbFilter) > 0 {
+		json.Unmarshal([]byte(dttbFilter), &filter.GlobalQueryFilter)
 	}
 
 	bookings := service.repository.GetBookings(filter)

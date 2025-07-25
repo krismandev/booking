@@ -1,6 +1,7 @@
 package request
 
 import (
+	"encoding/json"
 	"math"
 	"strconv"
 )
@@ -10,6 +11,16 @@ type GlobalListDataRequest struct {
 	Limit    string `json:"limit"`
 	OrderBy  string `json:"orderBy"`
 	OrderDir string `json:"orderDir"`
+}
+
+func (r *GlobalListDataRequest) ParseToJson() string {
+	var output string
+
+	jsonByte, _ := json.Marshal(r)
+
+	output = string(jsonByte)
+
+	return output
 }
 
 func (r *GlobalListDataRequest) CollectMetadata(count int) (perPage int, currentPage int, totalPage int) {

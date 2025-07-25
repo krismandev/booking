@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/labstack/gommon/log"
 	"github.com/sirupsen/logrus"
@@ -237,15 +238,19 @@ func (c DBConnection) Paginate(filter model.GlobalQueryFilter) func(db *gorm.DB)
 	return func(db *gorm.DB) *gorm.DB {
 		// q := r.URL.Query()
 		var limit int
-		if filter.Limit > 0 {
-			limit = filter.Limit
+		var err error
+		if len(filter.Limit) > 0 {
+			limit, _ = strconv.Atoi(filter.Limit)
 		} else {
 			limit = 10
 		}
 
 		var page int
-		if filter.Page > 1 {
-			page = filter.Page
+		if len(filter.Page) > 0 {
+			page, err = strconv.Atoi(filter.Page)
+			if err != nil {
+				page = 1
+			}
 		} else {
 			page = 1
 		}

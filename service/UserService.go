@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/url"
-	"strconv"
 	"time"
 
 	connection "booking/connection/database"
@@ -236,10 +235,8 @@ func (service *userServiceImpl) GetUsers(ctx context.Context, request request.Us
 		}
 	}
 
-	limit, _ := strconv.Atoi(request.Limit)
-	filter.Limit = limit
-	page, _ := strconv.Atoi(request.Page)
-	filter.Page = page
+	filter.Limit = request.Limit
+	filter.Page = request.Page
 	filter.OrderBy = request.OrderBy
 	filter.OrderDir = request.OrderDir
 

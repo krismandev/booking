@@ -189,7 +189,7 @@ func (repository *UserRepositoryImpl) FindUserByIDs(userIDs []string) ([]model.U
 func (repository *UserRepositoryImpl) DeactivateUser(userID string) error {
 	var err error
 
-	err = repository.db.DB.Where("id = ?", userID).Update("isactive", false).Error
+	err = repository.db.DB.Model(&model.User{}).Where("id = ?", userID).Update("isactive", false).Error
 	if err != nil {
 		logrus.Errorf("Error in repository : %v", err)
 	}
