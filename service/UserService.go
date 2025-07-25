@@ -31,17 +31,19 @@ type UserService interface {
 }
 
 type userServiceImpl struct {
-	repository     repository.UserRepository
-	roleRepository repository.RoleRepository
-	dbConn         *connection.DBConnection
-	config         *envcfg.Envcfg
+	repository           repository.UserRepository
+	departmentRepository repository.DepartmentRepository
+	roleRepository       repository.RoleRepository
+	dbConn               *connection.DBConnection
+	config               *envcfg.Envcfg
 }
 
-func NewUserService(repository repository.UserRepository, dbConn *connection.DBConnection, roleRepository repository.RoleRepository) UserService {
+func NewUserService(repository repository.UserRepository, dbConn *connection.DBConnection, roleRepository repository.RoleRepository, departmentRepository repository.DepartmentRepository) UserService {
 	return &userServiceImpl{
-		repository:     repository,
-		dbConn:         dbConn,
-		roleRepository: roleRepository,
+		repository:           repository,
+		dbConn:               dbConn,
+		roleRepository:       roleRepository,
+		departmentRepository: departmentRepository,
 	}
 }
 
@@ -242,6 +244,8 @@ func (service *userServiceImpl) GetUsers(ctx context.Context, request request.Us
 
 	users, count := service.repository.GetUserList(filter)
 
+	departments := service.departmentRepository.GetDepartments()
+
 	var userIDs []string
 	for _, each := range users {
 		userIDs = append(userIDs, each.ID)
@@ -262,7 +266,15 @@ func (service *userServiceImpl) GetUsers(ctx context.Context, request request.Us
 				userRole = ur
 			}
 		}
-		resp.Data = append(resp.Data, response.ToUserResponse(each, &userRole.Role))
+		userResp := response.ToUserResponse(each, &userRole.Role)
+
+		for _, dep := range departments {
+			if userResp.DepartmentID == userResp.DepartmentID {
+				department := response.ToDepartmentResponse(dep)
+				userResp.Department = &department
+			}
+		}
+		resp.Data = append(resp.Data, userResp)
 	}
 
 	return resp, err

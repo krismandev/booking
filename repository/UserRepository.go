@@ -125,12 +125,6 @@ func (repo *UserRepositoryImpl) GetUserList(filter model.UserListQueryFilter) ([
 		return output, count
 	}
 
-	// result := repo.db.DB.Where(&model.User{}).Limit(limit).Offset(offset).Find(&output)
-	// if result.Error != nil {
-	// 	logrus.Errorf("GetUserList SQL Error : %v", result.Error)
-	// 	return output, count
-	// }
-
 	countResult := repo.db.DB.Where(&model.User{}).Count(&count)
 	if countResult.Error != nil {
 		logrus.Errorf("Error in repository : %v", countResult.Error)

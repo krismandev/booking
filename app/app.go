@@ -46,8 +46,6 @@ func InitApp(app *Application) {
 	bookingController := controller.NewBookingController(bookingService)
 
 	roleRepository := repository.NewRoleRepository(app.DB)
-	userService := service.NewUserService(userRepository, app.DB, roleRepository)
-	userController := controller.NewUserController(userService)
 
 	authService := service.NewAuthService(userRepository, app.DB, roleRepository)
 	authController := controller.NewAuthController(authService)
@@ -58,6 +56,9 @@ func InitApp(app *Application) {
 	departmentRepository := repository.NewDepartmentRepository(app.DB)
 	departmentService := service.NewDepartmentService(departmentRepository)
 	departmentController := controller.NewDepartmentController(departmentService)
+
+	userService := service.NewUserService(userRepository, app.DB, roleRepository, departmentRepository)
+	userController := controller.NewUserController(userService)
 
 	routeConfig := route.RouteConfig{
 		Echo:                 app.Echo,

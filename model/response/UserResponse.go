@@ -10,13 +10,15 @@ type CreateUserResponse struct {
 }
 
 type UserResponse struct {
-	ID        string    `json:"id"`
-	CreatedAt *string   `json:"createdAt"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	Roles     *[]string `json:"roles,omitempty"`
-	Role      *string   `json:"role,omitempty"`
-	IsActive  bool      `json:"isActive"`
+	ID           string              `json:"id"`
+	CreatedAt    *string             `json:"createdAt"`
+	Email        string              `json:"email"`
+	Name         string              `json:"name"`
+	Roles        *[]string           `json:"roles,omitempty"`
+	Role         *RoleResponse       `json:"role,omitempty"`
+	IsActive     bool                `json:"isActive"`
+	DepartmentID string              `json:"departmentid"`
+	Department   *DepartmentResponse `json:"deparment"`
 }
 
 func ToUserResponse(dt model.User, role *model.Role) UserResponse {
@@ -27,9 +29,11 @@ func ToUserResponse(dt model.User, role *model.Role) UserResponse {
 	resp.Name = dt.Name
 	resp.CreatedAt = dt.CreatedAt
 	resp.IsActive = dt.IsActive
+	resp.DepartmentID = dt.DepartmentID
 
 	if role != nil {
-		resp.Role = &role.Name
+		roleResp := ToRoleResponse(*role)
+		resp.Role = &roleResp
 	}
 
 	return resp
